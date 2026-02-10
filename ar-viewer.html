@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>BURGRS AR Viewer</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
@@ -14,6 +14,7 @@
             margin: 0;
             overflow: hidden;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: none;
         }
         #ar-container {
             position: fixed;
@@ -156,6 +157,32 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .debug-info {
+            position: fixed;
+            top: 80px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 1000;
+            max-width: 300px;
+        }
+        .error-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,0,0,0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 2000;
+            max-width: 80%;
+        }
     </style>
 </head>
 <body>
@@ -165,21 +192,60 @@
         <p>Пожалуйста, разрешите доступ к камере</p>
     </div>
 
+    <div class="debug-info" id="debug-info">
+        <div>Загрузка: <span id="debug-status">Инициализация...</span></div>
+        <div>Модель: <span id="debug-model">-</span></div>
+        <div>Маркер: <span id="debug-marker">Не найден</span></div>
+    </div>
+
     <div id="ar-container">
-        <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;" renderer="logarithmicDepthBuffer: true;">
-            <a-assets>
+        <a-scene 
+            embedded 
+            arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; trackingMethod: best;"
+            renderer="logarithmicDepthBuffer: true; antialias: true; alpha: true;"
+            vr-mode-ui="enabled: false">
+            
+            <a-assets timeout="10000">
                 <a-asset-item id="burger-model" src="Burger.glb"></a-asset-item>
-                <a-asset-item id="bigburger-model" src="Big Burger.glb"></a-asset-item>
-                <a-asset-item id="zinger-model" src="Zinger burger.glb"></a-asset-item>
+                <a-asset-item id="bigburger-model" src="Big%20Burger.glb"></a-asset-item>
+                <a-asset-item id="zinger-model" src="Zinger%20burger.glb"></a-asset-item>
                 <a-asset-item id="hamburger-model" src="Hamburger.glb"></a-asset-item>
                 <a-asset-item id="hamburger2-model" src="Hamburger2.glb"></a-asset-item>
-                <a-asset-item id="burgerlow-model" src="Burger low.glb"></a-asset-item>
+                <a-asset-item id="burgerlow-model" src="Burger%20low.glb"></a-asset-item>
             </a-assets>
 
+            <!-- Освещение -->
+            <a-light type="ambient" color="#ffffff" intensity="0.8"></a-light>
+            <a-light type="directional" color="#ffffff" intensity="1" position="1 2 1"></a-light>
+            <a-light type="directional" color="#ffffff" intensity="0.5" position="-1 2 -1"></a-light>
+
             <!-- Hiro Marker -->
-            <a-marker preset="hiro" id="hiro-marker">
-                <a-entity id="burger-entity" position="0 0 0" scale="0.5 0.5 0.5">
+            <a-marker 
+                preset="hiro" 
+                id="hiro-marker"
+                smooth="true"
+                smoothCount="10"
+                smoothTolerance="0.01"
+                smoothThreshold="5">
+                
+                <a-entity 
+                    id="burger-entity" 
+                    position="0 0.1 0" 
+                    scale="0.3 0.3 0.3"
+                    rotation="0 0 0">
                 </a-entity>
+                
+                <!-- Базовая плоскость для отладки -->
+                <a-plane 
+                    id="debug-plane"
+                    position="0 0 0" 
+                    rotation="-90 0 0" 
+                    width="1" 
+                    height="1" 
+                    color="#00ff00"
+                    opacity="0.3"
+                    visible="false">
+                </a-plane>
             </a-marker>
 
             <a-entity camera></a-entity>
@@ -189,7 +255,7 @@
     <div class="ui-overlay">
         <div class="header">
             <h1>🍔 BURGRS AR</h1>
-            <p id="burger-subtitle">Наведите на QR-метку</p>
+            <p id="burger-subtitle">Наведите на Hiro-метку</p>
         </div>
 
         <div class="marker-hint" id="marker-hint">
@@ -205,6 +271,7 @@
                 <button class="btn btn-primary" onclick="rotateBurger()">🔄 Вращать</button>
                 <button class="btn btn-secondary" onclick="scaleUp()">➕ Увеличить</button>
                 <button class="btn btn-secondary" onclick="scaleDown()">➖ Уменьшить</button>
+                <button class="btn btn-secondary" onclick="toggleDebug()">🔧 Отладка</button>
                 <button class="btn btn-secondary" onclick="goBack()">🏠 Назад</button>
             </div>
         </div>
@@ -216,45 +283,53 @@
                 name: 'Classic Burger',
                 desc: 'Классический бургер с сочной котлетой, свежими овощами и фирменным соусом',
                 model: '#burger-model',
-                scale: '0.5 0.5 0.5'
+                scale: '0.3 0.3 0.3'
             },
             'big-burger': {
                 name: 'Big Burger',
                 desc: 'Большой бургер с двойной котлетой для настоящих гурманов',
                 model: '#bigburger-model',
-                scale: '0.4 0.4 0.4'
+                scale: '0.25 0.25 0.25'
             },
             'zinger': {
                 name: 'Zinger Burger',
                 desc: 'Острый куриный бургер с хрустящей корочкой и острым соусом',
                 model: '#zinger-model',
-                scale: '0.5 0.5 0.5'
+                scale: '0.3 0.3 0.3'
             },
             'hamburger': {
                 name: 'Hamburger',
                 desc: 'Традиционный гамбургер по классическому рецепту',
                 model: '#hamburger-model',
-                scale: '0.5 0.5 0.5'
+                scale: '0.3 0.3 0.3'
             },
             'hamburger2': {
                 name: 'Hamburger 2',
                 desc: 'Альтернативная версия гамбургера с особым вкусом',
                 model: '#hamburger2-model',
-                scale: '0.5 0.5 0.5'
+                scale: '0.3 0.3 0.3'
             },
             'burger-low': {
                 name: 'Burger Low',
                 desc: 'Легкий бургер для перекуса',
                 model: '#burgerlow-model',
-                scale: '0.5 0.5 0.5'
+                scale: '0.3 0.3 0.3'
             }
         };
 
         let currentBurger = 'burger';
-        let currentScale = 0.5;
+        let currentScale = 0.3;
         let isRotating = false;
+        let debugMode = false;
+
+        function updateDebug(message) {
+            console.log('[AR Debug]', message);
+            document.getElementById('debug-status').textContent = message;
+        }
 
         function init() {
+            updateDebug('Инициализация...');
+            
             const urlParams = new URLSearchParams(window.location.search);
             currentBurger = urlParams.get('burger') || 'burger';
             
@@ -263,28 +338,78 @@
                 document.getElementById('burger-name').textContent = data.name;
                 document.getElementById('burger-desc').textContent = data.desc;
                 document.getElementById('burger-subtitle').textContent = data.name;
+                document.getElementById('debug-model').textContent = data.model;
                 
                 const entity = document.getElementById('burger-entity');
+                
+                // Проверка загрузки ассета
+                const assetItem = document.querySelector(data.model);
+                if (assetItem) {
+                    assetItem.addEventListener('loaded', () => {
+                        updateDebug('Модель загружена!');
+                    });
+                    assetItem.addEventListener('error', (e) => {
+                        updateDebug('Ошибка загрузки модели!');
+                        console.error('Asset load error:', e);
+                    });
+                }
+                
                 entity.setAttribute('gltf-model', data.model);
                 entity.setAttribute('scale', data.scale);
                 currentScale = parseFloat(data.scale.split(' ')[0]);
+                
+                updateDebug('Модель установлена: ' + data.model);
+            } else {
+                updateDebug('Ошибка: бургер не найден');
             }
 
-            // Hide loading after 3 seconds
+            // Hide loading after initialization
             setTimeout(() => {
                 document.getElementById('loading').classList.add('hidden');
+                updateDebug('Готово к работе');
             }, 3000);
 
             // Marker events
             const marker = document.getElementById('hiro-marker');
             marker.addEventListener('markerFound', () => {
+                updateDebug('Маркер найден!');
+                document.getElementById('debug-marker').textContent = 'Найден ✓';
                 document.getElementById('marker-hint').classList.add('hidden');
                 document.getElementById('burger-info').classList.remove('hidden');
+                
+                // Показать отладочную плоскость в режиме отладки
+                if (debugMode) {
+                    document.getElementById('debug-plane').setAttribute('visible', 'true');
+                }
             });
+            
             marker.addEventListener('markerLost', () => {
+                updateDebug('Маркер потерян');
+                document.getElementById('debug-marker').textContent = 'Потерян';
                 document.getElementById('marker-hint').classList.remove('hidden');
                 document.getElementById('burger-info').classList.add('hidden');
             });
+
+            // Проверка поддержки камеры
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                updateDebug('Камера не поддерживается!');
+                alert('Ваш браузер не поддерживает доступ к камере. Используйте Chrome или Safari.');
+            }
+        }
+
+        function toggleDebug() {
+            debugMode = !debugMode;
+            const debugPlane = document.getElementById('debug-plane');
+            const debugInfo = document.getElementById('debug-info');
+            
+            if (debugMode) {
+                debugPlane.setAttribute('visible', 'true');
+                debugInfo.style.display = 'block';
+                updateDebug('Режим отладки включен');
+            } else {
+                debugPlane.setAttribute('visible', 'false');
+                debugInfo.style.display = 'none';
+            }
         }
 
         function rotateBurger() {
@@ -299,19 +424,27 @@
 
         function scaleUp() {
             const entity = document.getElementById('burger-entity');
-            currentScale = Math.min(currentScale + 0.1, 1.5);
+            currentScale = Math.min(currentScale + 0.05, 1.0);
             entity.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
+            updateDebug('Масштаб: ' + currentScale.toFixed(2));
         }
 
         function scaleDown() {
             const entity = document.getElementById('burger-entity');
-            currentScale = Math.max(currentScale - 0.1, 0.2);
+            currentScale = Math.max(currentScale - 0.05, 0.1);
             entity.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
+            updateDebug('Масштаб: ' + currentScale.toFixed(2));
         }
 
         function goBack() {
             window.location.href = 'index.html';
         }
+
+        // Обработка ошибок
+        window.addEventListener('error', (e) => {
+            console.error('Global error:', e);
+            updateDebug('Ошибка: ' + e.message);
+        });
 
         window.onload = init;
     </script>
