@@ -204,6 +204,7 @@
 
         let rotating = false;
         let scale = 8.0;
+        let firstDetection = true;
 
         // Обработчики для маркера Hiro
         const currentMarker = document.getElementById('marker-hiro');
@@ -220,7 +221,12 @@
             currentMarker.addEventListener('markerFound', (e) => {
                 log('✅✅✅ MARKER FOUND EVENT!');
                 log(`Marker matrix: ${JSON.stringify(e.detail.matrix)}`);
-                document.getElementById('hint').classList.add('hidden');
+                
+                // Hide hint only on first detection, keep it hidden afterwards
+                if(firstDetection) {
+                    document.getElementById('hint').classList.add('hidden');
+                    firstDetection = false;
+                }
                 document.getElementById('controls').classList.remove('hidden');
                 
                 // Показываем сущность
@@ -233,7 +239,7 @@
 
             currentMarker.addEventListener('markerLost', () => {
                 log('❌❌❌ MARKER LOST EVENT');
-                document.getElementById('hint').classList.remove('hidden');
+                // Don't show hint again once burger has been initially detected
                 document.getElementById('controls').classList.add('hidden');
             });
         } else {
