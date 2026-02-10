@@ -134,7 +134,7 @@
 
         <!-- Hiro Marker - универсальный для всех бургеров -->
         <a-marker preset="hiro" id="marker-hiro" emitevents="true">
-            <a-entity id="burger-display" position="0 -0.2 0" scale="1.0 1.0 1.0" rotation="0 0 0"></a-entity>
+            <a-entity id="burger-display" position="0 -0.2 0" scale="8.0 8.0 8.0" rotation="0 0 0"></a-entity>
         </a-marker>
 
         <a-entity camera></a-entity>
@@ -203,7 +203,7 @@
         }
 
         let rotating = false;
-        let scale = 1.0;
+        let scale = 8.0;
 
         // Обработчики для маркера Hiro
         const currentMarker = document.getElementById('marker-hiro');
@@ -273,13 +273,13 @@
         }
 
         function bigger() {
-            scale = Math.min(scale + 0.2, 2.0);
+            scale = Math.min(scale + 1.0, 16.0);
             document.getElementById('burger-display').setAttribute('scale', `${scale} ${scale} ${scale}`);
             log(`➕ Scale: ${scale} ${scale} ${scale}`);
         }
 
         function smaller() {
-            scale = Math.max(scale - 0.2, 0.2);
+            scale = Math.max(scale - 1.0, 2.0);
             document.getElementById('burger-display').setAttribute('scale', `${scale} ${scale} ${scale}`);
             log(`➖ Scale: ${scale} ${scale} ${scale}`);
         }
