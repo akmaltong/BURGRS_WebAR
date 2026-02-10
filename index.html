@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BURGRS WebAR</title>
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -14,11 +11,11 @@
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
             overflow-x: hidden;
+            color: white;
         }
         .hero {
             text-align: center;
             padding: 60px 20px;
-            color: white;
         }
         .hero h1 {
             font-size: 4rem;
@@ -67,8 +64,18 @@
             color: rgba(255,255,255,0.8);
             margin-bottom: 20px;
         }
-        .btn {
+        .marker-badge {
             display: inline-block;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            margin: 10px 0;
+            font-size: 1rem;
+        }
+        .btn {
+            display: block;
+            width: 80%;
+            margin: 10px auto 0;
             padding: 12px 30px;
             background: linear-gradient(45deg, #ff6b6b, #feca57);
             color: #1a1a2e;
@@ -84,69 +91,12 @@
             transform: scale(1.05);
             box-shadow: 0 10px 30px rgba(255,107,107,0.5);
         }
-        .qr-section {
-            background: rgba(255,255,255,0.05);
-            padding: 40px;
-            margin-top: 20px;
-            border-radius: 15px;
-        }
-        .qr-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
-            margin-top: 30px;
-        }
-        .qr-item {
-            text-align: center;
-        }
-        .qr-code {
-            width: 120px;
-            height: 120px;
-            background: white;
-            margin: 0 auto 10px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            color: #333;
-            position: relative;
-            overflow: hidden;
-        }
-        .qr-code::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                #000 0px,
-                #000 3px,
-                transparent 3px,
-                transparent 6px
-            ),
-            repeating-linear-gradient(
-                90deg,
-                #000 0px,
-                #000 3px,
-                transparent 3px,
-                transparent 6px
-            );
-            opacity: 0.8;
-        }
-        .qr-item span {
-            color: white;
-            font-size: 0.9rem;
-            display: block;
-            margin-top: 5px;
-        }
         .instructions {
             max-width: 800px;
             margin: 40px auto;
             padding: 30px;
             background: rgba(255,255,255,0.1);
             border-radius: 20px;
-            color: white;
         }
         .instructions h2 {
             color: #feca57;
@@ -166,45 +116,50 @@
         }
         @media (max-width: 768px) {
             .hero h1 { font-size: 2.5rem; }
-            .qr-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
 <body>
     <div class="hero">
         <h1>🍔 BURGRS AR</h1>
-        <p>Наведи камеру на QR-код и увидишь бургер в дополненной реальности!</p>
+        <p>Выбери бургер → Сканируй QR → Наведи на маркер!</p>
     </div>
 
     <div class="burgers-grid">
-        <div class="burger-card" onclick="openAR('burger')">
+        <div class="burger-card" onclick="openAR(0)">
             <h3>Classic Burger</h3>
             <p>Классический бургер с сочной котлетой</p>
+            <div class="marker-badge" style="background: #ff6b6b; color: white;">Маркер #0</div>
             <button class="btn">Смотреть в AR</button>
         </div>
-        <div class="burger-card" onclick="openAR('big-burger')">
+        <div class="burger-card" onclick="openAR(1)">
             <h3>Big Burger</h3>
             <p>Большой бургер для настоящих гурманов</p>
+            <div class="marker-badge" style="background: #feca57; color: #333;">Маркер #1</div>
             <button class="btn">Смотреть в AR</button>
         </div>
-        <div class="burger-card" onclick="openAR('zinger')">
+        <div class="burger-card" onclick="openAR(2)">
             <h3>Zinger Burger</h3>
             <p>Острый куриный бургер</p>
+            <div class="marker-badge" style="background: #48dbfb; color: #333;">Маркер #2</div>
             <button class="btn">Смотреть в AR</button>
         </div>
-        <div class="burger-card" onclick="openAR('hamburger')">
+        <div class="burger-card" onclick="openAR(3)">
             <h3>Hamburger</h3>
             <p>Традиционный гамбургер</p>
+            <div class="marker-badge" style="background: #1dd1a1; color: white;">Маркер #3</div>
             <button class="btn">Смотреть в AR</button>
         </div>
-        <div class="burger-card" onclick="openAR('hamburger2')">
+        <div class="burger-card" onclick="openAR(4)">
             <h3>Hamburger 2</h3>
             <p>Альтернативная версия гамбургера</p>
+            <div class="marker-badge" style="background: #5f27cd; color: white;">Маркер #4</div>
             <button class="btn">Смотреть в AR</button>
         </div>
-        <div class="burger-card" onclick="openAR('burger-low')">
+        <div class="burger-card" onclick="openAR(5)">
             <h3>Burger Low</h3>
             <p>Легкий бургер</p>
+            <div class="marker-badge" style="background: #ff9ff3; color: #333;">Маркер #5</div>
             <button class="btn">Смотреть в AR</button>
         </div>
     </div>
@@ -212,20 +167,23 @@
     <div class="instructions">
         <h2>📱 Как это работает?</h2>
         <ol>
-            <li><strong>QR-код на столе:</strong> Каждый бургер имеет свой уникальный QR-код в меню</li>
-            <li><strong>Сканируй:</strong> Наведи камеру телефона на QR-код</li>
-            <li><strong>Открывай:</strong> Автоматически откроется страница с выбранным бургером</li>
-            <li><strong>Разрешай камеру:</strong> Дай доступ к камере для AR</li>
-            <li><strong>Наслаждайся:</strong> Наведи на QR-маркер на столе и увидишь 3D бургер!</li>
+            <li><strong>Выберите бургер</strong> - нажмите на кнопку или QR-код</li>
+            <li><strong>QR-код откроет AR</strong> - с нужным бургером</li>
+            <li><strong>Найдите маркер</strong> - в меню найдите маркер с номером бургера (0-5)</li>
+            <li><strong>Наведите камеру</strong> - на соответствующий маркер</li>
+            <li><strong>Наслаждайтесь!</strong> - Увидите 3D модель бургера!</li>
         </ol>
         <p style="text-align: center; margin-top: 20px; color: #feca57;">
-            <strong>💡 Совет:</strong> Используй Hiro-метку (печатную или на экране) для отображения бургера
+            <strong>💡 Каждый бургер имеет свой уникальный маркер!</strong>
         </p>
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="markers.html" style="display: inline-block; padding: 15px 40px; background: linear-gradient(45deg, #ff6b6b, #feca57); color: #1a1a2e; text-decoration: none; border-radius: 30px; font-weight: bold;">📋 Скачать маркеры</a>
+        </div>
     </div>
 
     <script>
-        function openAR(burger) {
-            window.location.href = `ar-viewer.html?burger=${burger}`;
+        function openAR(burgerId) {
+            window.location.href = `ar-viewer.html?burger=${burgerId}`;
         }
     </script>
 </body>
