@@ -319,7 +319,7 @@
             const baseUrl = 'https://akmaltong.github.io/BURGRS_WebAR/';
             
             burgers.forEach(burger => {
-                const url = `${baseUrl}ar-viewer.html`;
+                const url = `${baseUrl}ar-viewer.html?burger=${burger.id}`;
                 
                 const item = document.createElement('div');
                 item.className = 'marker-item';

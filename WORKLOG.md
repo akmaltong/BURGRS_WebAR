@@ -24,16 +24,38 @@ C:\Users\akmal\Desktop\BURGRS_GLB\
 - **Библиотека**: QRCode.js (CDN)
 - **Функционал**: Автоматическая генерация QR-кодов для всех 6 бургеров
 - **URL бургеров**:
-  - Classic Burger: `.../ar-viewer.html?burger=burger`
-  - Big Burger: `.../ar-viewer.html?burger=big-burger`
-  - Zinger Burger: `.../ar-viewer.html?burger=zinger`
-  - Hamburger: `.../ar-viewer.html?burger=hamburger`
-  - Hamburger 2: `.../ar-viewer.html?burger=hamburger2`
-  - Burger Low: `.../ar-viewer.html?burger=burger-low`
+  - Classic Burger: `.../ar-viewer.html?burger=0`
+  - Big Burger: `.../ar-viewer.html?burger=1`
+  - Zinger Burger: `.../ar-viewer.html?burger=2`
+  - Hamburger: `.../ar-viewer.html?burger=3`
+  - Hamburger 2: `.../ar-viewer.html?burger=4`
+  - Burger Low: `.../ar-viewer.html?burger=5`
 
 ### 3. Деплой на GitHub Pages
 - ✅ Все изменения запушены в ветку master
 - ✅ Commit: "Fix GitHub Pages URLs and add QR code generator"
+
+## ✅ Выполненная работа (10.02.2026)
+
+### 1. Исправлены QR-коды
+- **Проблема**: QR-коды вели на общий URL без параметра бургера
+- **Решение**: Добавлен параметр `?burger={id}` для каждого QR-кода
+- **Файл**: `qr-codes.html`
+
+### 2. Созданы AR маркеры (.patt файлы)
+- **Новая папка**: `markers/`
+- **Файлы**: `marker-0.patt` до `marker-5.patt`
+- **Формат**: Pattern маркеры для AR.js (16x16 grid)
+- **Надёжность**: Pattern маркеры работают стабильнее чем barcode
+
+### 3. Обновлён AR-viewer
+- **Изменение**: Переход с barcode маркеров на pattern маркеры
+- **Файл**: `ar-viewer.html`
+- **Преимущество**: Лучшее распознавание и стабильность
+
+### 4. Исправлены ссылки
+- **Проблема**: index.html ссылался на несуществующий markers.html
+- **Решение**: Обновлена ссылка на qr-codes.html
 
 ## 🔧 Текущий статус
 

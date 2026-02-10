@@ -92,7 +92,7 @@
     </div>
 
     <a-scene embedded 
-             arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;" 
+             arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono;" 
              renderer="logarithmicDepthBuffer: true;" 
              vr-mode-ui="enabled: false">
         
@@ -109,32 +109,32 @@
         <a-light type="directional" color="#ffffff" intensity="1" position="1 2 1"></a-light>
 
         <!-- Маркер 0 - Classic Burger -->
-        <a-marker type="barcode" value="0" id="marker-0">
+        <a-marker type="pattern" url="markers/marker-0.patt" id="marker-0">
             <a-entity id="burger-0" position="0 0 0" scale="8 8 8"></a-entity>
         </a-marker>
 
         <!-- Маркер 1 - Big Burger -->
-        <a-marker type="barcode" value="1" id="marker-1">
+        <a-marker type="pattern" url="markers/marker-1.patt" id="marker-1">
             <a-entity id="burger-1" position="0 0 0" scale="6 6 6"></a-entity>
         </a-marker>
 
         <!-- Маркер 2 - Zinger Burger -->
-        <a-marker type="barcode" value="2" id="marker-2">
+        <a-marker type="pattern" url="markers/marker-2.patt" id="marker-2">
             <a-entity id="burger-2" position="0 0 0" scale="8 8 8"></a-entity>
         </a-marker>
 
         <!-- Маркер 3 - Hamburger -->
-        <a-marker type="barcode" value="3" id="marker-3">
+        <a-marker type="pattern" url="markers/marker-3.patt" id="marker-3">
             <a-entity id="burger-3" position="0 0 0" scale="8 8 8"></a-entity>
         </a-marker>
 
         <!-- Маркер 4 - Hamburger 2 -->
-        <a-marker type="barcode" value="4" id="marker-4">
+        <a-marker type="pattern" url="markers/marker-4.patt" id="marker-4">
             <a-entity id="burger-4" position="0 0 0" scale="8 8 8"></a-entity>
         </a-marker>
 
         <!-- Маркер 5 - Burger Low -->
-        <a-marker type="barcode" value="5" id="marker-5">
+        <a-marker type="pattern" url="markers/marker-5.patt" id="marker-5">
             <a-entity id="burger-5" position="0 0 0" scale="8 8 8"></a-entity>
         </a-marker>
 
