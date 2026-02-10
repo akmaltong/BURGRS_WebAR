@@ -1,0 +1,86 @@
+# BURGRS WebAR Project - Сводка работы
+
+## 📁 Структура проекта
+```
+C:\Users\akmal\Desktop\BURGRS_GLB\
+├── index.html              # Главная страница с выбором бургеров
+├── ar-viewer.html          # AR просмотрщик 3D моделей
+├── menu-print.html         # Страница с описанием QR-кодов (устарела)
+├── qr-codes.html           # ✅ Генератор QR-кодов для печати (новый)
+├── qr/                     # Папка со старыми QR-кодами (файлы frame.png и др.)
+├── *.glb                   # 3D модели бургеров
+└── README.md
+```
+
+## ✅ Выполненная работа (10.02.2025)
+
+### 1. Исправлены GitHub Pages URL
+- **Проблема**: В menu-print.html были локальные ссылки `file:///C:/...`
+- **Решение**: Заменены на `https://akmaltong.github.io/BURGRS_WebAR/`
+- **Файл**: `menu-print.html` (строки 302-307)
+
+### 2. Создан генератор QR-кодов
+- **Новый файл**: `qr-codes.html`
+- **Библиотека**: QRCode.js (CDN)
+- **Функционал**: Автоматическая генерация QR-кодов для всех 6 бургеров
+- **URL бургеров**:
+  - Classic Burger: `.../ar-viewer.html?burger=burger`
+  - Big Burger: `.../ar-viewer.html?burger=big-burger`
+  - Zinger Burger: `.../ar-viewer.html?burger=zinger`
+  - Hamburger: `.../ar-viewer.html?burger=hamburger`
+  - Hamburger 2: `.../ar-viewer.html?burger=hamburger2`
+  - Burger Low: `.../ar-viewer.html?burger=burger-low`
+
+### 3. Деплой на GitHub Pages
+- ✅ Все изменения запушены в ветку master
+- ✅ Commit: "Fix GitHub Pages URLs and add QR code generator"
+
+## 🔧 Текущий статус
+
+### Работает:
+- ✅ Главная страница (index.html)
+- ✅ AR просмотрщик (ar-viewer.html) с поддержкой Hiro-метки
+- ✅ Генератор QR-кодов (qr-codes.html)
+- ✅ Загрузка 3D моделей (.glb файлы)
+
+### Требует проверки:
+- ⚠️ GitHub Pages должен быть включен в настройках репозитория
+- ⚠️ Source должен быть настроен на ветку master, папку / (root)
+- ⚠️ Публикация может занять 5-10 минут после пуша
+
+### Рабочие URL (после включения GitHub Pages):
+- Главная: `https://akmaltong.github.io/BURGRS_WebAR/`
+- AR Viewer: `https://akmaltong.github.io/BURGRS_WebAR/ar-viewer.html?burger=burger`
+- QR-коды: `https://akmaltong.github.io/BURGRS_WebAR/qr-codes.html`
+
+## 📝 Что нужно сделать в будущем
+
+### Приоритет: Высокий
+1. **Проверить работу GitHub Pages** - зайти в настройки репозитория и убедиться что Pages включен
+2. **Проверить QR-коды** - отсканировать с телефона и проверить что открывается правильная страница
+3. **Проверить AR** - протестировать отображение 3D моделей через камеру с Hiro-меткой
+
+### Приоритет: Средний
+4. **Доработать menu-print.html** - возможно заменить старые плейсхолдеры QR-кодов на реальные
+5. **Добавить favicon** - для красоты и узнаваемости
+6. **Добавить Open Graph meta tags** - для красивого отображения при шаринге
+
+### Приоритет: Низкий
+7. **Оптимизировать 3D модели** - некоторые .glb файлы очень большие (Hamburger2.glb ~10MB)
+8. **Добавить preloader** - показывать загрузку моделей
+9. **Улучшить UX на мобильных** - проверить адаптивность
+
+## 🐛 Известные проблемы
+- 404 ошибка при сканировании QR (было исправлено)
+- Hiro-метка требуется отдельно (не генерируется в проекте)
+
+## 🔗 Ресурсы
+- **GitHub репозиторий**: https://github.com/akmaltong/BURGRS_WebAR.git
+- **GitHub Pages URL**: https://akmaltong.github.io/BURGRS_WebAR/
+- **Hiro marker**: https://raw.githack.com/AR-js-org/AR.js/master/data/images/hiro.png
+
+## 💡 Примечания для следующей сессии
+- Основная проблема 404 была связана с локальными file:// ссылками
+- Новый файл qr-codes.html генерирует реальные сканируемые QR-коды
+- После пуша нужно подождать 5-10 минут для публикации на GitHub Pages
+- Все 3D модели загружаются из файлов .glb в корне проекта
