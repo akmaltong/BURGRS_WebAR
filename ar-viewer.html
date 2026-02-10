@@ -100,13 +100,12 @@
         <div class="hint" id="hint">
             <h2>📱 Наведите на маркер <span id="hint-marker">0</span></h2>
             <p style="margin-top: 10px;">Найдите в меню маркер с номером <span id="hint-num">0</span></p>
-            <button class="btn" onclick="testModel()" style="margin-top: 20px; pointer-events: auto;">🧪 Тест без маркера</button>
         </div>
         <div class="controls hidden" id="controls">
             <button class="btn" onclick="rotate()">🔄 Вращать</button>
             <button class="btn" onclick="bigger()">➕</button>
             <button class="btn" onclick="smaller()">➖</button>
-            <button class="btn" onclick="testModel()">🧪 Тест</button>
+            
             <button class="btn" onclick="back()">🏠 Назад</button>
         </div>
         <div class="error-msg hidden" id="ar-error">
@@ -135,7 +134,7 @@
 
         <!-- Hiro Marker - универсальный для всех бургеров -->
         <a-marker preset="hiro" id="marker-hiro" emitevents="true">
-            <a-entity id="burger-display" position="0 0 0" scale="0.5 0.5 0.5" rotation="0 0 0"></a-entity>
+            <a-entity id="burger-display" position="0 -0.2 0" scale="1.0 1.0 1.0" rotation="0 0 0"></a-entity>
         </a-marker>
 
         <a-entity camera></a-entity>
@@ -204,7 +203,7 @@
         }
 
         let rotating = false;
-        let scale = 0.5;
+        let scale = 1.0;
 
         // Обработчики для маркера Hiro
         const currentMarker = document.getElementById('marker-hiro');
@@ -289,31 +288,7 @@
             window.location.href = 'index.html';
         }
 
-        // Тест модели без маркера
-        let testMode = false;
-        function testModel() {
-            if (testMode) return;
-            testMode = true;
-            log('🧪 TEST MODE: Showing model without marker');
-            const entity = document.getElementById('burger-display');
-            
-            if (entity && data) {
-                // Показываем модель напрямую без маркера
-                entity.setAttribute('visible', 'true');
-                entity.setAttribute('position', '0 0 -2'); // Перед камерой
-                entity.setAttribute('scale', '0.5 0.5 0.5'); // Подходящий масштаб для теста
-                entity.setAttribute('gltf-model', data.model);
-                
-                document.getElementById('hint').classList.add('hidden');
-                document.getElementById('controls').classList.remove('hidden');
-                
-                log('✅ TEST MODE: Model displayed');
-                log(`📐 Scale: 0.5 0.5 0.5`);
-                log(`📍 Position: 0 0 -2`);
-            } else {
-                log(`❌ Entity: ${!!entity}, Data: ${!!data}`);
-            }
-        }
+
 
         // Check scene loading
         const scene = document.querySelector('a-scene');
