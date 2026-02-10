@@ -204,7 +204,7 @@
     <div id="ar-container">
         <a-scene 
             embedded 
-            arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; sourceWidth: 1280; sourceHeight: 960; displayWidth: 1280; displayHeight: 960;"
+            arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; sourceWidth: 1280; sourceHeight: 960; displayWidth: 1280; displayHeight: 960; facingMode: environment;"
             renderer="logarithmicDepthBuffer: true; antialias: true; alpha: true;"
             vr-mode-ui="enabled: false">
             
@@ -233,8 +233,8 @@
                 
                 <a-entity 
                     id="burger-entity" 
-                    position="0 0.5 0" 
-                    scale="3 3 3"
+                    position="0 1 0" 
+                    scale="15 15 15"
                     rotation="0 0 0">
                 </a-entity>
                 
@@ -286,42 +286,42 @@
                 name: 'Classic Burger',
                 desc: 'Классический бургер с сочной котлетой, свежими овощами и фирменным соусом',
                 model: '#burger-model',
-                scale: '3 3 3'
+                scale: '15 15 15'
             },
             'big-burger': {
                 name: 'Big Burger',
                 desc: 'Большой бургер с двойной котлетой для настоящих гурманов',
                 model: '#bigburger-model',
-                scale: '2.5 2.5 2.5'
+                scale: '12 12 12'
             },
             'zinger': {
                 name: 'Zinger Burger',
                 desc: 'Острый куриный бургер с хрустящей корочкой и острым соусом',
                 model: '#zinger-model',
-                scale: '3 3 3'
+                scale: '15 15 15'
             },
             'hamburger': {
                 name: 'Hamburger',
                 desc: 'Традиционный гамбургер по классическому рецепту',
                 model: '#hamburger-model',
-                scale: '3 3 3'
+                scale: '15 15 15'
             },
             'hamburger2': {
                 name: 'Hamburger 2',
                 desc: 'Альтернативная версия гамбургера с особым вкусом',
                 model: '#hamburger2-model',
-                scale: '3 3 3'
+                scale: '15 15 15'
             },
             'burger-low': {
                 name: 'Burger Low',
                 desc: 'Легкий бургер для перекуса',
                 model: '#burgerlow-model',
-                scale: '3 3 3'
+                scale: '15 15 15'
             }
         };
 
         let currentBurger = 'burger';
-        let currentScale = 3;
+        let currentScale = 15;
         let isRotating = false;
         let debugMode = false;
 
