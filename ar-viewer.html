@@ -87,15 +87,15 @@
             <button class="btn" onclick="rotate()">🔄 Вращать</button>
             <button class="btn" onclick="bigger()">➕</button>
             <button class="btn" onclick="smaller()">➖</button>
+            <button class="btn" onclick="testModel()">🧪 Тест</button>
             <button class="btn" onclick="back()">🏠 Назад</button>
         </div>
     </div>
 
     <a-scene embedded 
-             arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; trackingMethod: best;" 
+             arjs="sourceType: webcam; debugUIEnabled: true; detectionMode: mono_and_matrix; matrixCodeType: 3x3;" 
              renderer="logarithmicDepthBuffer: true; antialias: true;" 
-             vr-mode-ui="enabled: false"
-             device-orientation-permission-ui="enabled: false">
+             vr-mode-ui="enabled: false">
         
         <a-assets>
             <a-asset-item id="burger-model" src="Burger.glb"></a-asset-item>
@@ -110,16 +110,16 @@
         <a-light type="directional" color="#ffffff" intensity="1" position="1 2 1"></a-light>
 
         <!-- Hiro Marker - универсальный для всех бургеров -->
-        <a-marker preset="hiro" id="marker-hiro">
-            <a-entity id="burger-display" position="0 0 0" scale="8 8 8"></a-entity>
+        <a-marker preset="hiro" id="marker-hiro" emitevents="true">
+            <a-entity id="burger-display" position="0 0.5 0" scale="8 8 8" rotation="0 0 0"></a-entity>
         </a-marker>
 
         <a-entity camera></a-entity>
     </a-scene>
 
     <!-- Debug Console -->
-    <div id="debug-console" style="position: fixed; bottom: 100px; left: 10px; right: 10px; max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; font-family: monospace; font-size: 12px; z-index: 100; border-radius: 10px;">
-        <div>🚀 AR Viewer загружен</div>
+    <div id="debug-console" style="position: fixed; top: 150px; left: 10px; right: 10px; max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.9); color: #0f0; padding: 10px; font-family: monospace; font-size: 11px; z-index: 100; border-radius: 5px; border: 2px solid #0f0;">
+        <div style="font-weight: bold; margin-bottom: 5px;">🚀 AR Viewer загружен</div>
     </div>
 
     <script>
@@ -155,11 +155,7 @@
             document.getElementById('marker-num').textContent = burgerId;
             document.getElementById('hint-marker').textContent = burgerId;
             document.getElementById('hint-num').textContent = burgerId;
-            
-            // Загружаем модель в соответствующий маркер
-            const entity = document.getElementById(`burger-${burgerId}`);
-            entity.setAttribute('gltf-model', data.model);
-            log(`Model set: ${data.model}`);
+            log(`Burger data loaded: ${data.name}`);
         } else {
             log(`ERROR: Burger ${burgerId} not found!`);
         }
@@ -171,16 +167,30 @@
         const currentMarker = document.getElementById('marker-hiro');
         
         if (currentMarker) {
-            log('✅ Hiro marker element found');
+            log('✅ Hiro marker element found in DOM');
             
-            currentMarker.addEventListener('markerFound', () => {
-                log('✅ Hiro marker FOUND!');
+            // Проверяем статус маркера каждую секунду
+            setInterval(() => {
+                const isVisible = currentMarker.object3D.visible;
+                log(`👁️ Marker visible: ${isVisible}`);
+            }, 3000);
+            
+            currentMarker.addEventListener('markerFound', (e) => {
+                log('✅✅✅ MARKER FOUND EVENT!');
+                log(`Marker matrix: ${JSON.stringify(e.detail.matrix)}`);
                 document.getElementById('hint').classList.add('hidden');
                 document.getElementById('controls').classList.remove('hidden');
+                
+                // Показываем сущность
+                const entity = document.getElementById('burger-display');
+                if (entity) {
+                    entity.setAttribute('visible', 'true');
+                    log('👁️ Entity set to VISIBLE');
+                }
             });
 
             currentMarker.addEventListener('markerLost', () => {
-                log('❌ Hiro marker LOST');
+                log('❌❌❌ MARKER LOST EVENT');
                 document.getElementById('hint').classList.remove('hidden');
                 document.getElementById('controls').classList.add('hidden');
             });
@@ -190,18 +200,24 @@
 
         // Обработка загрузки модели
         const entity = document.getElementById('burger-display');
-        if (entity) {
+        if (entity && data) {
             entity.addEventListener('model-loaded', (e) => {
-                log(`✅ Model LOADED: ${data.model}`);
+                log(`✅ Model LOADED successfully!`);
+                log(`📐 Scale: ${entity.getAttribute('scale')}`);
+                log(`📍 Position: ${entity.getAttribute('position')}`);
             });
             entity.addEventListener('model-error', (e) => {
-                log(`❌ Model ERROR: ${data.model}`);
+                log(`❌ Model ERROR loading: ${data.model}`);
+                log(`Error details: ${JSON.stringify(e.detail)}`);
             });
-            // Загружаем модель
-            entity.setAttribute('gltf-model', data.model);
-            log(`Set model: ${data.model}`);
+            
+            // Ждем загрузки сцены перед установкой модели
+            setTimeout(() => {
+                entity.setAttribute('gltf-model', data.model);
+                log(`⏳ Setting model: ${data.model}`);
+            }, 1000);
         } else {
-            log('❌ ERROR: burger-display entity NOT FOUND!');
+            log(`❌ ERROR: Entity=${!!entity}, Data=${!!data}`);
         }
 
         function rotate() {
@@ -232,18 +248,49 @@
             window.location.href = 'index.html';
         }
 
+        // Тест модели без маркера
+        function testModel() {
+            log('🧪 TEST: Showing model without marker');
+            const entity = document.getElementById('burger-display');
+            const marker = document.getElementById('marker-hiro');
+            
+            if (entity && marker) {
+                // Скрываем маркер и показываем модель напрямую
+                entity.setAttribute('visible', 'true');
+                log('✅ Model forced to visible');
+                log(`📐 Current scale: ${entity.getAttribute('scale')}`);
+                log(`📦 Has model: ${entity.hasAttribute('gltf-model')}`);
+                log(`🔗 Model src: ${entity.getAttribute('gltf-model')}`);
+            } else {
+                log(`❌ Entity: ${!!entity}, Marker: ${!!marker}`);
+            }
+        }
+
         // Check scene loading
-        document.querySelector('a-scene').addEventListener('loaded', () => {
+        const scene = document.querySelector('a-scene');
+        scene.addEventListener('loaded', () => {
             log('✅ Scene LOADED');
+            
+            // Проверяем видео элемент
+            setTimeout(() => {
+                const video = document.querySelector('video');
+                if (video) {
+                    log(`📹 Video element: ${video.videoWidth}x${video.videoHeight}`);
+                    log(`📹 Video playing: ${!video.paused}`);
+                } else {
+                    log('❌ Video element NOT FOUND');
+                }
+            }, 2000);
         });
 
         // Check AR.js ready
-        window.addEventListener('arjs-video-loaded', () => {
+        window.addEventListener('arjs-video-loaded', (e) => {
             log('✅ AR Camera READY');
+            log(`📹 Video stream active`);
         });
 
         window.addEventListener('arjs-video-error', (e) => {
-            log(`❌ Camera ERROR: ${e.detail}`);
+            log(`❌ Camera ERROR: ${JSON.stringify(e.detail)}`);
         });
 
         // Asset loading checks
@@ -255,6 +302,15 @@
                 log(`❌ Asset ERROR: ${asset.getAttribute('src')}`);
             });
         });
+
+        // Проверяем ARToolkit
+        setTimeout(() => {
+            if (typeof ARToolkitContext !== 'undefined') {
+                log('✅ ARToolkit loaded');
+            } else {
+                log('❌ ARToolkit NOT loaded');
+            }
+        }, 3000);
     </script>
 </body>
 </html>
