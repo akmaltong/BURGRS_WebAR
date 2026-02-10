@@ -92,9 +92,10 @@
     </div>
 
     <a-scene embedded 
-             arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono;" 
-             renderer="logarithmicDepthBuffer: true;" 
-             vr-mode-ui="enabled: false">
+             arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; trackingMethod: best;" 
+             renderer="logarithmicDepthBuffer: true; antialias: true;" 
+             vr-mode-ui="enabled: false"
+             device-orientation-permission-ui="enabled: false">
         
         <a-assets>
             <a-asset-item id="burger-model" src="Burger.glb"></a-asset-item>
@@ -108,40 +109,30 @@
         <a-light type="ambient" color="#ffffff" intensity="0.8"></a-light>
         <a-light type="directional" color="#ffffff" intensity="1" position="1 2 1"></a-light>
 
-        <!-- Маркер 0 - Classic Burger -->
-        <a-marker type="pattern" url="markers/marker-0.patt" id="marker-0">
-            <a-entity id="burger-0" position="0 0 0" scale="8 8 8"></a-entity>
-        </a-marker>
-
-        <!-- Маркер 1 - Big Burger -->
-        <a-marker type="pattern" url="markers/marker-1.patt" id="marker-1">
-            <a-entity id="burger-1" position="0 0 0" scale="6 6 6"></a-entity>
-        </a-marker>
-
-        <!-- Маркер 2 - Zinger Burger -->
-        <a-marker type="pattern" url="markers/marker-2.patt" id="marker-2">
-            <a-entity id="burger-2" position="0 0 0" scale="8 8 8"></a-entity>
-        </a-marker>
-
-        <!-- Маркер 3 - Hamburger -->
-        <a-marker type="pattern" url="markers/marker-3.patt" id="marker-3">
-            <a-entity id="burger-3" position="0 0 0" scale="8 8 8"></a-entity>
-        </a-marker>
-
-        <!-- Маркер 4 - Hamburger 2 -->
-        <a-marker type="pattern" url="markers/marker-4.patt" id="marker-4">
-            <a-entity id="burger-4" position="0 0 0" scale="8 8 8"></a-entity>
-        </a-marker>
-
-        <!-- Маркер 5 - Burger Low -->
-        <a-marker type="pattern" url="markers/marker-5.patt" id="marker-5">
-            <a-entity id="burger-5" position="0 0 0" scale="8 8 8"></a-entity>
+        <!-- Hiro Marker - универсальный для всех бургеров -->
+        <a-marker preset="hiro" id="marker-hiro">
+            <a-entity id="burger-display" position="0 0 0" scale="8 8 8"></a-entity>
         </a-marker>
 
         <a-entity camera></a-entity>
     </a-scene>
 
+    <!-- Debug Console -->
+    <div id="debug-console" style="position: fixed; bottom: 100px; left: 10px; right: 10px; max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; font-family: monospace; font-size: 12px; z-index: 100; border-radius: 10px;">
+        <div>🚀 AR Viewer загружен</div>
+    </div>
+
     <script>
+        // Debug logger
+        function log(msg) {
+            console.log(msg);
+            const debugDiv = document.getElementById('debug-console');
+            const entry = document.createElement('div');
+            entry.textContent = `> ${msg}`;
+            debugDiv.appendChild(entry);
+            debugDiv.scrollTop = debugDiv.scrollHeight;
+        }
+
         const burgerData = {
             0: { name: 'Classic Burger', desc: 'Классический бургер с сочной котлетой', model: '#burger-model' },
             1: { name: 'Big Burger', desc: 'Большой бургер с двойной котлетой', model: '#bigburger-model' },
@@ -156,6 +147,8 @@
         const burgerId = parseInt(params.get('burger')) || 0;
         const data = burgerData[burgerId];
 
+        log(`Burger ID: ${burgerId}`);
+
         if (data) {
             document.getElementById('burger-name').textContent = data.name;
             document.getElementById('burger-desc').textContent = data.desc;
@@ -166,49 +159,102 @@
             // Загружаем модель в соответствующий маркер
             const entity = document.getElementById(`burger-${burgerId}`);
             entity.setAttribute('gltf-model', data.model);
+            log(`Model set: ${data.model}`);
+        } else {
+            log(`ERROR: Burger ${burgerId} not found!`);
         }
 
         let rotating = false;
         let scale = 8;
 
-        // Обработчики для маркера текущего бургера
-        const currentMarker = document.getElementById(`marker-${burgerId}`);
+        // Обработчики для маркера Hiro
+        const currentMarker = document.getElementById('marker-hiro');
         
-        currentMarker.addEventListener('markerFound', () => {
-            console.log(`✅ Маркер ${burgerId} найден!`);
-            document.getElementById('hint').classList.add('hidden');
-            document.getElementById('controls').classList.remove('hidden');
-        });
+        if (currentMarker) {
+            log('✅ Hiro marker element found');
+            
+            currentMarker.addEventListener('markerFound', () => {
+                log('✅ Hiro marker FOUND!');
+                document.getElementById('hint').classList.add('hidden');
+                document.getElementById('controls').classList.remove('hidden');
+            });
 
-        currentMarker.addEventListener('markerLost', () => {
-            console.log(`❌ Маркер ${burgerId} потерян`);
-            document.getElementById('hint').classList.remove('hidden');
-            document.getElementById('controls').classList.add('hidden');
-        });
+            currentMarker.addEventListener('markerLost', () => {
+                log('❌ Hiro marker LOST');
+                document.getElementById('hint').classList.remove('hidden');
+                document.getElementById('controls').classList.add('hidden');
+            });
+        } else {
+            log('❌ ERROR: Hiro marker element NOT FOUND!');
+        }
+
+        // Обработка загрузки модели
+        const entity = document.getElementById('burger-display');
+        if (entity) {
+            entity.addEventListener('model-loaded', (e) => {
+                log(`✅ Model LOADED: ${data.model}`);
+            });
+            entity.addEventListener('model-error', (e) => {
+                log(`❌ Model ERROR: ${data.model}`);
+            });
+            // Загружаем модель
+            entity.setAttribute('gltf-model', data.model);
+            log(`Set model: ${data.model}`);
+        } else {
+            log('❌ ERROR: burger-display entity NOT FOUND!');
+        }
 
         function rotate() {
             rotating = !rotating;
-            const entity = document.getElementById(`burger-${burgerId}`);
+            const entity = document.getElementById('burger-display');
             if (rotating) {
                 entity.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 4000');
+                log('🔄 Rotation ON');
             } else {
                 entity.removeAttribute('animation');
+                log('🔄 Rotation OFF');
             }
         }
 
         function bigger() {
             scale = Math.min(scale + 1, 12);
-            document.getElementById(`burger-${burgerId}`).setAttribute('scale', `${scale} ${scale} ${scale}`);
+            document.getElementById('burger-display').setAttribute('scale', `${scale} ${scale} ${scale}`);
+            log(`➕ Scale: ${scale}`);
         }
 
         function smaller() {
             scale = Math.max(scale - 1, 4);
-            document.getElementById(`burger-${burgerId}`).setAttribute('scale', `${scale} ${scale} ${scale}`);
+            document.getElementById('burger-display').setAttribute('scale', `${scale} ${scale} ${scale}`);
+            log(`➖ Scale: ${scale}`);
         }
 
         function back() {
             window.location.href = 'index.html';
         }
+
+        // Check scene loading
+        document.querySelector('a-scene').addEventListener('loaded', () => {
+            log('✅ Scene LOADED');
+        });
+
+        // Check AR.js ready
+        window.addEventListener('arjs-video-loaded', () => {
+            log('✅ AR Camera READY');
+        });
+
+        window.addEventListener('arjs-video-error', (e) => {
+            log(`❌ Camera ERROR: ${e.detail}`);
+        });
+
+        // Asset loading checks
+        document.querySelectorAll('a-asset-item').forEach(asset => {
+            asset.addEventListener('loaded', () => {
+                log(`✅ Asset loaded: ${asset.getAttribute('src')}`);
+            });
+            asset.addEventListener('error', (e) => {
+                log(`❌ Asset ERROR: ${asset.getAttribute('src')}`);
+            });
+        });
     </script>
 </body>
 </html>
