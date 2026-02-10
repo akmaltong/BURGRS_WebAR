@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BURGRS - QR Коды для печати</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 40px 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .menu-item {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            break-inside: avoid;
+        }
+        .menu-item h3 {
+            color: #ff6b6b;
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .menu-item p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+        .qr-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 15px;
+            padding: 10px;
+            background: white;
+            border: 3px solid #1a1a2e;
+            border-radius: 10px;
+        }
+        .price {
+            font-size: 1.5rem;
+            color: #feca57;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .url-text {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 10px;
+            word-break: break-all;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 30px auto;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+        }
+        .instructions {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .instructions h2 {
+            color: #1a1a2e;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .instructions ol {
+            padding-left: 20px;
+            color: #333;
+            line-height: 1.8;
+        }
+        @media print {
+            body { background: white; padding: 0; }
+            .no-print { display: none !important; }
+            .menu-item {
+                box-shadow: none;
+                border: 2px solid #ddd;
+                page-break-inside: avoid;
+            }
+        }
+        @media (max-width: 768px) {
+            .qr-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header no-print">
+        <h1>🍔 BURGRS - QR Меню</h1>
+        <p>Распечатайте QR-коды и разместите их на столах в бургерной</p>
+    </div>
+
+    <div class="qr-grid" id="qr-container">
+        <!-- QR codes will be generated here -->
+    </div>
+
+    <div class="instructions no-print">
+        <h2>📋 Инструкция</h2>
+        <ol>
+            <li><strong>Распечатайте эту страницу</strong> (Ctrl+P или кнопка ниже)</li>
+            <li><strong>Разместите QR-коды на столах</strong> в бургерной (можно ламинировать)</li>
+            <li><strong>Гость сканирует QR-код</strong> телефоном</li>
+            <li><strong>Открывается страница с AR</strong> - нужно разрешить доступ к камере</li>
+            <li><strong>Наводит на Hiro-метку</strong> → появляется 3D модель бургера!</li>
+        </ol>
+        <button class="btn" onclick="window.print()">🖨️ Распечатать QR-коды</button>
+        <a href="index.html" class="btn" style="background: #1a1a2e;">🏠 На главную</a>
+    </div>
+
+    <script>
+        const baseUrl = 'https://akmaltong.github.io/BURGRS_WebAR/';
+        
+        const burgers = [
+            { id: 'burger', name: 'Classic Burger', desc: 'Классический бургер с сочной котлетой, свежими овощами и фирменным соусом', price: '450 ₽' },
+            { id: 'big-burger', name: 'Big Burger', desc: 'Большой бургер с двойной котлетой для настоящих гурманов', price: '650 ₽' },
+            { id: 'zinger', name: 'Zinger Burger', desc: 'Острый куриный бургер с хрустящей корочкой и острым соусом', price: '480 ₽' },
+            { id: 'hamburger', name: 'Hamburger', desc: 'Традиционный гамбургер по классическому рецепту', price: '380 ₽' },
+            { id: 'hamburger2', name: 'Hamburger 2', desc: 'Альтернативная версия гамбургера с особым вкусом', price: '420 ₽' },
+            { id: 'burger-low', name: 'Burger Low', desc: 'Легкий бургер для перекуса', price: '320 ₽' }
+        ];
+
+        function generateQR() {
+            const container = document.getElementById('qr-container');
+            
+            burgers.forEach((burger, index) => {
+                const url = `${baseUrl}ar-viewer.html?burger=${burger.id}`;
+                
+                const item = document.createElement('div');
+                item.className = 'menu-item';
+                item.innerHTML = `
+                    <h3>${burger.name}</h3>
+                    <p>${burger.desc}</p>
+                    <div class="qr-container" id="qr-${index}"></div>
+                    <div class="price">${burger.price}</div>
+                    <div class="url-text">${url}</div>
+                `;
+                container.appendChild(item);
+                
+                // Generate QR code
+                new QRCode(document.getElementById(`qr-${index}`), {
+                    text: url,
+                    width: 180,
+                    height: 180,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            });
+        }
+
+        window.onload = generateQR;
+    </script>
+</body>
+</html>
