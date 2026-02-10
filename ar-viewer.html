@@ -315,16 +315,15 @@
 
         window.addEventListener('arjs-video-error', (e) => {
             log(`❌ Camera ERROR: ${JSON.stringify(e.detail)}`);
-            log('⚠️ Switching to TEST mode...');
-            testModel();
+            log('⚠️ Camera error occurred');
         });
 
-        // Если через 10 секунд камера не запустилась - показываем тестовый режим
+        // Если через 10 секунд камера не запустилась - показываем сообщение об ошибке
         setTimeout(() => {
             const video = document.querySelector('video');
             if (!video || video.paused) {
-                log('⚠️ Camera timeout - enabling TEST mode');
-                testModel();
+                log('⚠️ Camera timeout - please check permissions');
+                document.getElementById('ar-error').classList.remove('hidden');
             }
         }, 10000);
 
