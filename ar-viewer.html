@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BURGRS AR</title>
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
     <style>
         body { margin: 0; overflow: hidden; font-family: Arial, sans-serif; }
@@ -70,6 +70,24 @@
             cursor: pointer;
         }
         .hidden { display: none !important; }
+        .error-msg {
+            background: #ff4444;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px;
+            text-align: center;
+        }
+        .reload-btn {
+            background: white;
+            color: #ff4444;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -82,6 +100,7 @@
         <div class="hint" id="hint">
             <h2>📱 Наведите на маркер <span id="hint-marker">0</span></h2>
             <p style="margin-top: 10px;">Найдите в меню маркер с номером <span id="hint-num">0</span></p>
+            <button class="btn" onclick="testModel()" style="margin-top: 20px; pointer-events: auto;">🧪 Тест без маркера</button>
         </div>
         <div class="controls hidden" id="controls">
             <button class="btn" onclick="rotate()">🔄 Вращать</button>
@@ -90,12 +109,17 @@
             <button class="btn" onclick="testModel()">🧪 Тест</button>
             <button class="btn" onclick="back()">🏠 Назад</button>
         </div>
+        <div class="error-msg hidden" id="ar-error">
+            ⚠️ AR не загрузился<br>
+            <button class="reload-btn" onclick="location.reload()">🔄 Перезагрузить</button>
+        </div>
     </div>
 
     <a-scene embedded 
-             arjs="sourceType: webcam; debugUIEnabled: true; detectionMode: mono_and_matrix; matrixCodeType: 3x3;" 
+             arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; sourceWidth:1280; sourceHeight:960; displayWidth: 1280; displayHeight: 960;" 
              renderer="logarithmicDepthBuffer: true; antialias: true;" 
-             vr-mode-ui="enabled: false">
+             vr-mode-ui="enabled: false"
+             loading-screen="dotsColor: red; backgroundColor: black">
         
         <a-assets>
             <a-asset-item id="burger-model" src="Burger.glb"></a-asset-item>
@@ -127,11 +151,40 @@
         function log(msg) {
             console.log(msg);
             const debugDiv = document.getElementById('debug-console');
-            const entry = document.createElement('div');
-            entry.textContent = `> ${msg}`;
-            debugDiv.appendChild(entry);
-            debugDiv.scrollTop = debugDiv.scrollHeight;
+            if (debugDiv) {
+                const entry = document.createElement('div');
+                entry.textContent = `> ${msg}`;
+                debugDiv.appendChild(entry);
+                debugDiv.scrollTop = debugDiv.scrollHeight;
+            }
         }
+
+        // Проверка загрузки библиотек
+        function checkLibraries() {
+            const checks = {
+                'A-Frame': typeof AFRAME !== 'undefined',
+                'AR.js': typeof ARjs !== 'undefined' || typeof THREEx !== 'undefined',
+                'THREE.js': typeof THREE !== 'undefined'
+            };
+            
+            log('=== Library Check ===');
+            for (const [name, loaded] of Object.entries(checks)) {
+                log(`${loaded ? '✅' : '❌'} ${name}: ${loaded ? 'OK' : 'NOT LOADED'}`);
+            }
+            
+            return checks['A-Frame'] && checks['AR.js'];
+        }
+
+        // Ждем загрузки всех скриптов
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const arLoaded = checkLibraries();
+                if (!arLoaded) {
+                    log('⚠️ AR libraries not loaded! Retrying...');
+                    document.getElementById('ar-error').classList.remove('hidden');
+                }
+            }, 3000);
+        });
 
         const burgerData = {
             0: { name: 'Classic Burger', desc: 'Классический бургер с сочной котлетой', model: '#burger-model' },
@@ -208,14 +261,12 @@
             });
             entity.addEventListener('model-error', (e) => {
                 log(`❌ Model ERROR loading: ${data.model}`);
-                log(`Error details: ${JSON.stringify(e.detail)}`);
+                log(`Error: ${e.detail && e.detail.message ? e.detail.message : 'Unknown error'}`);
             });
             
-            // Ждем загрузки сцены перед установкой модели
-            setTimeout(() => {
-                entity.setAttribute('gltf-model', data.model);
-                log(`⏳ Setting model: ${data.model}`);
-            }, 1000);
+            // Устанавливаем модель сразу
+            entity.setAttribute('gltf-model', data.model);
+            log(`⏳ Setting model: ${data.model}`);
         } else {
             log(`❌ ERROR: Entity=${!!entity}, Data=${!!data}`);
         }
@@ -249,20 +300,28 @@
         }
 
         // Тест модели без маркера
+        let testMode = false;
         function testModel() {
-            log('🧪 TEST: Showing model without marker');
+            if (testMode) return;
+            testMode = true;
+            log('🧪 TEST MODE: Showing model without marker');
             const entity = document.getElementById('burger-display');
-            const marker = document.getElementById('marker-hiro');
             
-            if (entity && marker) {
-                // Скрываем маркер и показываем модель напрямую
+            if (entity && data) {
+                // Показываем модель напрямую без маркера
                 entity.setAttribute('visible', 'true');
-                log('✅ Model forced to visible');
-                log(`📐 Current scale: ${entity.getAttribute('scale')}`);
-                log(`📦 Has model: ${entity.hasAttribute('gltf-model')}`);
-                log(`🔗 Model src: ${entity.getAttribute('gltf-model')}`);
+                entity.setAttribute('position', '0 0 -3'); // Перед камерой
+                entity.setAttribute('scale', '3 3 3');
+                entity.setAttribute('gltf-model', data.model);
+                
+                document.getElementById('hint').classList.add('hidden');
+                document.getElementById('controls').classList.remove('hidden');
+                
+                log('✅ TEST MODE: Model displayed');
+                log(`📐 Scale: 3 3 3`);
+                log(`📍 Position: 0 0 -3`);
             } else {
-                log(`❌ Entity: ${!!entity}, Marker: ${!!marker}`);
+                log(`❌ Entity: ${!!entity}, Data: ${!!data}`);
             }
         }
 
@@ -291,7 +350,18 @@
 
         window.addEventListener('arjs-video-error', (e) => {
             log(`❌ Camera ERROR: ${JSON.stringify(e.detail)}`);
+            log('⚠️ Switching to TEST mode...');
+            testModel();
         });
+
+        // Если через 10 секунд камера не запустилась - показываем тестовый режим
+        setTimeout(() => {
+            const video = document.querySelector('video');
+            if (!video || video.paused) {
+                log('⚠️ Camera timeout - enabling TEST mode');
+                testModel();
+            }
+        }, 10000);
 
         // Asset loading checks
         document.querySelectorAll('a-asset-item').forEach(asset => {
