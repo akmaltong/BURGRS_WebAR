@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>BURGRS AR Viewer</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #ar-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .header {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p {
+            margin: 5px 0 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .burger-info {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 30px 20px;
+            color: white;
+            pointer-events: auto;
+        }
+        .burger-name {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #feca57;
+            margin-bottom: 10px;
+        }
+        .burger-desc {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: #1a1a2e;
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        .marker-hint {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 30px;
+            border-radius: 20px;
+            pointer-events: none;
+        }
+        .marker-hint h3 {
+            margin-bottom: 15px;
+            color: #feca57;
+        }
+        .marker-icon {
+            width: 100px;
+            height: 100px;
+            border: 3px solid white;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a2e;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top: 5px solid #ff6b6b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <h2>Загрузка AR...</h2>
+        <p>Пожалуйста, разрешите доступ к камере</p>
+    </div>
+
+    <div id="ar-container">
+        <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;" renderer="logarithmicDepthBuffer: true;">
+            <a-assets>
+                <a-asset-item id="burger-model" src="Burger.glb"></a-asset-item>
+                <a-asset-item id="bigburger-model" src="Big Burger.glb"></a-asset-item>
+                <a-asset-item id="zinger-model" src="Zinger burger.glb"></a-asset-item>
+                <a-asset-item id="hamburger-model" src="Hamburger.glb"></a-asset-item>
+                <a-asset-item id="hamburger2-model" src="Hamburger2.glb"></a-asset-item>
+                <a-asset-item id="burgerlow-model" src="Burger low.glb"></a-asset-item>
+            </a-assets>
+
+            <!-- Hiro Marker -->
+            <a-marker preset="hiro" id="hiro-marker">
+                <a-entity id="burger-entity" position="0 0 0" scale="0.5 0.5 0.5">
+                </a-entity>
+            </a-marker>
+
+            <a-entity camera></a-entity>
+        </a-scene>
+    </div>
+
+    <div class="ui-overlay">
+        <div class="header">
+            <h1>🍔 BURGRS AR</h1>
+            <p id="burger-subtitle">Наведите на QR-метку</p>
+        </div>
+
+        <div class="marker-hint" id="marker-hint">
+            <div class="marker-icon">📱</div>
+            <h3>Наведите камеру на Hiro-метку</h3>
+            <p>Используйте печатную или экранную метку Hiro</p>
+        </div>
+
+        <div class="burger-info hidden" id="burger-info">
+            <div class="burger-name" id="burger-name">Burger</div>
+            <div class="burger-desc" id="burger-desc">Описание бургера</div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="rotateBurger()">🔄 Вращать</button>
+                <button class="btn btn-secondary" onclick="scaleUp()">➕ Увеличить</button>
+                <button class="btn btn-secondary" onclick="scaleDown()">➖ Уменьшить</button>
+                <button class="btn btn-secondary" onclick="goBack()">🏠 Назад</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const burgerData = {
+            'burger': {
+                name: 'Classic Burger',
+                desc: 'Классический бургер с сочной котлетой, свежими овощами и фирменным соусом',
+                model: '#burger-model',
+                scale: '0.5 0.5 0.5'
+            },
+            'big-burger': {
+                name: 'Big Burger',
+                desc: 'Большой бургер с двойной котлетой для настоящих гурманов',
+                model: '#bigburger-model',
+                scale: '0.4 0.4 0.4'
+            },
+            'zinger': {
+                name: 'Zinger Burger',
+                desc: 'Острый куриный бургер с хрустящей корочкой и острым соусом',
+                model: '#zinger-model',
+                scale: '0.5 0.5 0.5'
+            },
+            'hamburger': {
+                name: 'Hamburger',
+                desc: 'Традиционный гамбургер по классическому рецепту',
+                model: '#hamburger-model',
+                scale: '0.5 0.5 0.5'
+            },
+            'hamburger2': {
+                name: 'Hamburger 2',
+                desc: 'Альтернативная версия гамбургера с особым вкусом',
+                model: '#hamburger2-model',
+                scale: '0.5 0.5 0.5'
+            },
+            'burger-low': {
+                name: 'Burger Low',
+                desc: 'Легкий бургер для перекуса',
+                model: '#burgerlow-model',
+                scale: '0.5 0.5 0.5'
+            }
+        };
+
+        let currentBurger = 'burger';
+        let currentScale = 0.5;
+        let isRotating = false;
+
+        function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentBurger = urlParams.get('burger') || 'burger';
+            
+            const data = burgerData[currentBurger];
+            if (data) {
+                document.getElementById('burger-name').textContent = data.name;
+                document.getElementById('burger-desc').textContent = data.desc;
+                document.getElementById('burger-subtitle').textContent = data.name;
+                
+                const entity = document.getElementById('burger-entity');
+                entity.setAttribute('gltf-model', data.model);
+                entity.setAttribute('scale', data.scale);
+                currentScale = parseFloat(data.scale.split(' ')[0]);
+            }
+
+            // Hide loading after 3 seconds
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+            }, 3000);
+
+            // Marker events
+            const marker = document.getElementById('hiro-marker');
+            marker.addEventListener('markerFound', () => {
+                document.getElementById('marker-hint').classList.add('hidden');
+                document.getElementById('burger-info').classList.remove('hidden');
+            });
+            marker.addEventListener('markerLost', () => {
+                document.getElementById('marker-hint').classList.remove('hidden');
+                document.getElementById('burger-info').classList.add('hidden');
+            });
+        }
+
+        function rotateBurger() {
+            const entity = document.getElementById('burger-entity');
+            isRotating = !isRotating;
+            if (isRotating) {
+                entity.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear');
+            } else {
+                entity.removeAttribute('animation');
+            }
+        }
+
+        function scaleUp() {
+            const entity = document.getElementById('burger-entity');
+            currentScale = Math.min(currentScale + 0.1, 1.5);
+            entity.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
+        }
+
+        function scaleDown() {
+            const entity = document.getElementById('burger-entity');
+            currentScale = Math.max(currentScale - 0.1, 0.2);
+            entity.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
+        }
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

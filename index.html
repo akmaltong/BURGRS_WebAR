@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BURGRS WebAR</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+        .burgers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+        .burger-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .burger-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(255,107,107,0.3);
+        }
+        .burger-card h3 {
+            color: #feca57;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .burger-card p {
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: #1a1a2e;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255,107,107,0.5);
+        }
+        .qr-section {
+            background: rgba(255,255,255,0.05);
+            padding: 40px;
+            margin-top: 20px;
+            border-radius: 15px;
+        }
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 30px;
+        }
+        .qr-item {
+            text-align: center;
+        }
+        .qr-code {
+            width: 120px;
+            height: 120px;
+            background: white;
+            margin: 0 auto 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #333;
+            position: relative;
+            overflow: hidden;
+        }
+        .qr-code::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                #000 0px,
+                #000 3px,
+                transparent 3px,
+                transparent 6px
+            ),
+            repeating-linear-gradient(
+                90deg,
+                #000 0px,
+                #000 3px,
+                transparent 3px,
+                transparent 6px
+            );
+            opacity: 0.8;
+        }
+        .qr-item span {
+            color: white;
+            font-size: 0.9rem;
+            display: block;
+            margin-top: 5px;
+        }
+        .instructions {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            color: white;
+        }
+        .instructions h2 {
+            color: #feca57;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .instructions ol {
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .instructions strong {
+            color: #ff6b6b;
+        }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .qr-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>🍔 BURGRS AR</h1>
+        <p>Наведи камеру на QR-код и увидишь бургер в дополненной реальности!</p>
+    </div>
+
+    <div class="burgers-grid">
+        <div class="burger-card" onclick="openAR('burger')">
+            <h3>Classic Burger</h3>
+            <p>Классический бургер с сочной котлетой</p>
+            <button class="btn">Смотреть в AR</button>
+        </div>
+        <div class="burger-card" onclick="openAR('big-burger')">
+            <h3>Big Burger</h3>
+            <p>Большой бургер для настоящих гурманов</p>
+            <button class="btn">Смотреть в AR</button>
+        </div>
+        <div class="burger-card" onclick="openAR('zinger')">
+            <h3>Zinger Burger</h3>
+            <p>Острый куриный бургер</p>
+            <button class="btn">Смотреть в AR</button>
+        </div>
+        <div class="burger-card" onclick="openAR('hamburger')">
+            <h3>Hamburger</h3>
+            <p>Традиционный гамбургер</p>
+            <button class="btn">Смотреть в AR</button>
+        </div>
+        <div class="burger-card" onclick="openAR('hamburger2')">
+            <h3>Hamburger 2</h3>
+            <p>Альтернативная версия гамбургера</p>
+            <button class="btn">Смотреть в AR</button>
+        </div>
+        <div class="burger-card" onclick="openAR('burger-low')">
+            <h3>Burger Low</h3>
+            <p>Легкий бургер</p>
+            <button class="btn">Смотреть в AR</button>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h2>📱 Как это работает?</h2>
+        <ol>
+            <li><strong>QR-код на столе:</strong> Каждый бургер имеет свой уникальный QR-код в меню</li>
+            <li><strong>Сканируй:</strong> Наведи камеру телефона на QR-код</li>
+            <li><strong>Открывай:</strong> Автоматически откроется страница с выбранным бургером</li>
+            <li><strong>Разрешай камеру:</strong> Дай доступ к камере для AR</li>
+            <li><strong>Наслаждайся:</strong> Наведи на QR-маркер на столе и увидишь 3D бургер!</li>
+        </ol>
+        <p style="text-align: center; margin-top: 20px; color: #feca57;">
+            <strong>💡 Совет:</strong> Используй Hiro-метку (печатную или на экране) для отображения бургера
+        </p>
+    </div>
+
+    <script>
+        function openAR(burger) {
+            window.location.href = `ar-viewer.html?burger=${burger}`;
+        }
+    </script>
+</body>
+</html>
