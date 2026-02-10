@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>BURGRS AR - Без метки</title>
+    <title>BURGRS AR - Кастомные маркеры</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
@@ -91,18 +91,17 @@
             padding: 30px;
             border-radius: 20px;
             pointer-events: none;
+            max-width: 90%;
         }
-        .tap-hint {
-            position: fixed;
-            bottom: 200px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            background: rgba(0,0,0,0.7);
-            padding: 15px 30px;
-            border-radius: 30px;
-            font-size: 1.1rem;
-            pointer-events: none;
+        .marker-preview {
+            width: 150px;
+            height: 150px;
+            background: white;
+            margin: 20px auto;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
@@ -110,11 +109,9 @@
     <div id="ar-container">
         <a-scene 
             embedded 
-            arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; sourceWidth: 1280; sourceHeight: 960; displayWidth: 1280; displayHeight: 960; facingMode: environment;"
+            arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceWidth: 1280; sourceHeight: 960; displayWidth: 1280; displayHeight: 960; facingMode: environment;"
             renderer="logarithmicDepthBuffer: true; antialias: true; alpha: true;"
-            vr-mode-ui="enabled: false"
-            cursor="rayOrigin: mouse"
-            raycaster="objects: .clickable">
+            vr-mode-ui="enabled: false">
             
             <a-assets timeout="10000">
                 <a-asset-item id="burger-model" src="Burger.glb"></a-asset-item>
@@ -130,19 +127,58 @@
             <a-light type="directional" color="#ffffff" intensity="1" position="1 2 1"></a-light>
             <a-light type="directional" color="#ffffff" intensity="0.5" position="-1 2 -1"></a-light>
 
-            <!-- Маркер для позиционирования -->
+            <!-- Маркер 0 - Classic Burger -->
             <a-marker 
-                preset="hiro" 
-                id="hiro-marker"
+                type="barcode" 
+                value="0"
+                id="marker-0"
                 emitevents="true">
-                
-                <a-entity 
-                    id="burger-entity" 
-                    position="0 0 0" 
-                    scale="8 8 8"
-                    rotation="0 0 0"
-                    class="clickable">
-                </a-entity>
+                <a-entity id="burger-0" position="0 0 0" scale="8 8 8"></a-entity>
+            </a-marker>
+
+            <!-- Маркер 1 - Big Burger -->
+            <a-marker 
+                type="barcode" 
+                value="1"
+                id="marker-1"
+                emitevents="true">
+                <a-entity id="burger-1" position="0 0 0" scale="6 6 6"></a-entity>
+            </a-marker>
+
+            <!-- Маркер 2 - Zinger Burger -->
+            <a-marker 
+                type="barcode" 
+                value="2"
+                id="marker-2"
+                emitevents="true">
+                <a-entity id="burger-2" position="0 0 0" scale="8 8 8"></a-entity>
+            </a-marker>
+
+            <!-- Маркер 3 - Hamburger -->
+            <a-marker 
+                type="barcode" 
+                value="3"
+                id="marker-3"
+                emitevents="true">
+                <a-entity id="burger-3" position="0 0 0" scale="8 8 8"></a-entity>
+            </a-marker>
+
+            <!-- Маркер 4 - Hamburger 2 -->
+            <a-marker 
+                type="barcode" 
+                value="4"
+                id="marker-4"
+                emitevents="true">
+                <a-entity id="burger-4" position="0 0 0" scale="8 8 8"></a-entity>
+            </a-marker>
+
+            <!-- Маркер 5 - Burger Low -->
+            <a-marker 
+                type="barcode" 
+                value="5"
+                id="marker-5"
+                emitevents="true">
+                <a-entity id="burger-5" position="0 0 0" scale="8 8 8"></a-entity>
             </a-marker>
 
             <a-entity camera></a-entity>
@@ -152,15 +188,28 @@
     <div class="ui-overlay">
         <div class="header">
             <h1>🍔 BURGRS AR</h1>
-            <p id="burger-subtitle">Наведите на Hiro-метку</p>
+            <p id="burger-subtitle">Наведите на маркер бургера</p>
         </div>
 
         <div class="instruction" id="instruction">
-            <h2>📱 Наведите на Hiro-метку</h2>
-            <p style="margin-top: 15px;">Используйте стандартную Hiro-метку<br>или <a href="https://raw.githack.com/AR-js-org/AR.js/master/data/images/hiro.png" target="_blank" style="color: #feca57;">откройте её на экране</a></p>
+            <h2>📱 Наведите на маркер бургера</h2>
+            <p style="margin-top: 15px;">Используйте цветные маркеры с QR-меню<br>Каждый бургер имеет свой маркер!</p>
+            <div class="marker-preview" id="marker-preview">
+                <svg width="120" height="120" viewBox="0 0 100 100">
+                    <rect width="100" height="100" fill="white"/>
+                    <rect x="10" y="10" width="80" height="80" fill="none" stroke="black" stroke-width="2"/>
+                    <!-- Barcode 3x3 pattern placeholder -->
+                    <rect x="20" y="20" width="20" height="20" fill="black"/>
+                    <rect x="60" y="20" width="20" height="20" fill="black"/>
+                    <rect x="20" y="60" width="20" height="20" fill="black"/>
+                    <rect x="40" y="40" width="20" height="20" fill="black"/>
+                    <rect x="60" y="60" width="20" height="20" fill="black"/>
+                </svg>
+            </div>
+            <p style="font-size: 0.9rem; color: #aaa;">Маркер должен быть напечатан<br>из меню qr-codes.html</p>
         </div>
 
-        <div class="burger-info" id="burger-info">
+        <div class="burger-info hidden" id="burger-info">
             <div style="text-align: center;">
                 <h2 id="burger-name" style="color: #feca57; margin-bottom: 10px;">Burger</h2>
                 <p id="burger-desc" style="margin-bottom: 20px;">Описание</p>
@@ -176,64 +225,73 @@
 
     <script>
         const burgerData = {
-            'burger': { name: 'Classic Burger', model: '#burger-model', scale: '8 8 8' },
-            'big-burger': { name: 'Big Burger', model: '#bigburger-model', scale: '6 6 6' },
-            'zinger': { name: 'Zinger Burger', model: '#zinger-model', scale: '8 8 8' },
-            'hamburger': { name: 'Hamburger', model: '#hamburger-model', scale: '8 8 8' },
-            'hamburger2': { name: 'Hamburger 2', model: '#hamburger2-model', scale: '8 8 8' },
-            'burger-low': { name: 'Burger Low', model: '#burgerlow-model', scale: '8 8 8' }
+            0: { name: 'Classic Burger', desc: 'Классический бургер с сочной котлетой', model: '#burger-model', scale: '8 8 8' },
+            1: { name: 'Big Burger', desc: 'Большой бургер с двойной котлетой', model: '#bigburger-model', scale: '6 6 6' },
+            2: { name: 'Zinger Burger', desc: 'Острый куриный бургер', model: '#zinger-model', scale: '8 8 8' },
+            3: { name: 'Hamburger', desc: 'Традиционный гамбургер', model: '#hamburger-model', scale: '8 8 8' },
+            4: { name: 'Hamburger 2', desc: 'Альтернативная версия', model: '#hamburger2-model', scale: '8 8 8' },
+            5: { name: 'Burger Low', desc: 'Легкий бургер', model: '#burgerlow-model', scale: '8 8 8' }
         };
 
-        let currentBurger = 'burger';
+        let currentBurger = null;
         let currentScale = 8;
         let isRotating = false;
+        let activeEntity = null;
 
         function init() {
-            const urlParams = new URLSearchParams(window.location.search);
-            currentBurger = urlParams.get('burger') || 'burger';
-            
-            const data = burgerData[currentBurger];
-            if (data) {
-                document.getElementById('burger-name').textContent = data.name;
-                document.getElementById('burger-desc').textContent = data.desc || '';
+            // Setup all markers
+            for (let i = 0; i <= 5; i++) {
+                const marker = document.getElementById(`marker-${i}`);
+                const entity = document.getElementById(`burger-${i}`);
+                const data = burgerData[i];
                 
-                const entity = document.getElementById('burger-entity');
+                // Load model
                 entity.setAttribute('gltf-model', data.model);
-                entity.setAttribute('scale', data.scale);
-                currentScale = parseFloat(data.scale.split(' ')[0]);
+                
+                marker.addEventListener('markerFound', () => {
+                    currentBurger = i;
+                    activeEntity = entity;
+                    currentScale = parseFloat(data.scale.split(' ')[0]);
+                    
+                    document.getElementById('burger-name').textContent = data.name;
+                    document.getElementById('burger-desc').textContent = data.desc;
+                    document.getElementById('instruction').classList.add('hidden');
+                    document.getElementById('burger-info').classList.remove('hidden');
+                    
+                    console.log(`Marker ${i} found: ${data.name}`);
+                });
+                
+                marker.addEventListener('markerLost', () => {
+                    if (currentBurger === i) {
+                        document.getElementById('instruction').classList.remove('hidden');
+                        document.getElementById('burger-info').classList.add('hidden');
+                        currentBurger = null;
+                        activeEntity = null;
+                    }
+                });
             }
-
-            const marker = document.getElementById('hiro-marker');
-            marker.addEventListener('markerFound', () => {
-                document.getElementById('instruction').classList.add('hidden');
-                document.getElementById('burger-info').classList.remove('hidden');
-            });
-            marker.addEventListener('markerLost', () => {
-                document.getElementById('instruction').classList.remove('hidden');
-                document.getElementById('burger-info').classList.add('hidden');
-            });
         }
 
         function rotateBurger() {
-            const entity = document.getElementById('burger-entity');
+            if (!activeEntity) return;
             isRotating = !isRotating;
             if (isRotating) {
-                entity.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear');
+                activeEntity.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear');
             } else {
-                entity.removeAttribute('animation');
+                activeEntity.removeAttribute('animation');
             }
         }
 
         function scaleUp() {
-            const entity = document.getElementById('burger-entity');
+            if (!activeEntity) return;
             currentScale = Math.min(currentScale + 0.5, 15);
-            entity.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
+            activeEntity.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
         }
 
         function scaleDown() {
-            const entity = document.getElementById('burger-entity');
+            if (!activeEntity) return;
             currentScale = Math.max(currentScale - 0.5, 2);
-            entity.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
+            activeEntity.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
         }
 
         function goBack() {
