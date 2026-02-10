@@ -3,35 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>BURGRS AR Viewer</title>
+    <title>BURGRS AR</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            touch-action: none;
-        }
-        #ar-container {
+        body { margin: 0; overflow: hidden; font-family: Arial, sans-serif; }
+        #ui {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
-        }
-        .ui-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
             pointer-events: none;
+            z-index: 10;
         }
         .header {
             background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
@@ -39,208 +24,136 @@
             color: white;
             text-align: center;
         }
-        .burger-info {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            padding: 30px 20px;
-            color: white;
-            pointer-events: auto;
-        }
-        .controls {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 25px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: bold;
-            pointer-events: auto;
-        }
-        .btn-primary {
-            background: linear-gradient(45deg, #ff6b6b, #feca57);
-            color: #1a1a2e;
-        }
-        .btn-secondary {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 2px solid white;
-        }
-        .marker-hint {
+        .hint {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            text-align: center;
-            color: white;
             background: rgba(0,0,0,0.8);
+            color: white;
             padding: 30px;
             border-radius: 20px;
-            pointer-events: none;
+            text-align: center;
         }
-        .hidden {
-            display: none !important;
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            padding: 20px;
+            pointer-events: auto;
         }
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <div id="ar-container">
-        <a-scene 
-            embedded 
-            arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
-            renderer="logarithmicDepthBuffer: true;"
-            vr-mode-ui="enabled: false">
-            
-            <a-assets timeout="10000">
-                <a-asset-item id="burger-model" src="Burger.glb"></a-asset-item>
-                <a-asset-item id="bigburger-model" src="Big%20Burger.glb"></a-asset-item>
-                <a-asset-item id="zinger-model" src="Zinger%20burger.glb"></a-asset-item>
-                <a-asset-item id="hamburger-model" src="Hamburger.glb"></a-asset-item>
-                <a-asset-item id="hamburger2-model" src="Hamburger2.glb"></a-asset-item>
-                <a-asset-item id="burgerlow-model" src="Burger%20low.glb"></a-asset-item>
-            </a-assets>
-
-            <a-light type="ambient" color="#ffffff" intensity="0.8"></a-light>
-            <a-light type="directional" color="#ffffff" intensity="1" position="1 2 1"></a-light>
-
-            <!-- Маркер 0 - Classic -->
-            <a-marker type="barcode" value="0" id="marker-0">
-                <a-entity id="burger-0" position="0 0 0" scale="8 8 8"></a-entity>
-            </a-marker>
-
-            <!-- Маркер 1 - Big -->
-            <a-marker type="barcode" value="1" id="marker-1">
-                <a-entity id="burger-1" position="0 0 0" scale="6 6 6"></a-entity>
-            </a-marker>
-
-            <!-- Маркер 2 - Zinger -->
-            <a-marker type="barcode" value="2" id="marker-2">
-                <a-entity id="burger-2" position="0 0 0" scale="8 8 8"></a-entity>
-            </a-marker>
-
-            <!-- Маркер 3 - Hamburger -->
-            <a-marker type="barcode" value="3" id="marker-3">
-                <a-entity id="burger-3" position="0 0 0" scale="8 8 8"></a-entity>
-            </a-marker>
-
-            <!-- Маркер 4 - Hamburger 2 -->
-            <a-marker type="barcode" value="4" id="marker-4">
-                <a-entity id="burger-4" position="0 0 0" scale="8 8 8"></a-entity>
-            </a-marker>
-
-            <!-- Маркер 5 - Burger Low -->
-            <a-marker type="barcode" value="5" id="marker-5">
-                <a-entity id="burger-5" position="0 0 0" scale="8 8 8"></a-entity>
-            </a-marker>
-
-            <a-entity camera></a-entity>
-        </a-scene>
-    </div>
-
-    <div class="ui-overlay">
+    <div id="ui">
         <div class="header">
-            <h1>🍔 BURGRS AR</h1>
-            <p id="burger-subtitle">Наведите на маркер бургера</p>
+            <h1>🍔 <span id="burger-name">Burger</span></h1>
+            <p id="burger-desc">Наведите на Hiro маркер</p>
         </div>
-
-        <div class="marker-hint" id="marker-hint">
+        <div class="hint" id="hint">
             <h2>📱 Наведите на маркер</h2>
-            <p style="margin-top: 15px;">Каждый бургер имеет свой маркер<br>с номером 0-5</p>
+            <p style="margin-top: 10px;">Используйте печатный Hiro маркер</p>
         </div>
-
-        <div class="burger-info hidden" id="burger-info">
-            <h2 id="burger-name" style="text-align: center; color: #feca57; margin-bottom: 10px;">Burger</h2>
-            <div class="controls">
-                <button class="btn btn-primary" onclick="rotateBurger()">🔄 Вращать</button>
-                <button class="btn btn-secondary" onclick="scaleUp()">➕</button>
-                <button class="btn btn-secondary" onclick="scaleDown()">➖</button>
-                <button class="btn btn-secondary" onclick="goBack()">🏠 Назад</button>
-            </div>
+        <div class="controls hidden" id="controls">
+            <button class="btn" onclick="rotate()">🔄 Вращать</button>
+            <button class="btn" onclick="bigger()">➕</button>
+            <button class="btn" onclick="smaller()">➖</button>
+            <button class="btn" onclick="back()">🏠 Назад</button>
         </div>
     </div>
+
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" renderer="logarithmicDepthBuffer: true;" vr-mode-ui="enabled: false">
+        <a-assets>
+            <a-asset-item id="burger-model" src="Burger.glb"></a-asset-item>
+            <a-asset-item id="bigburger-model" src="Big%20Burger.glb"></a-asset-item>
+            <a-asset-item id="zinger-model" src="Zinger%20burger.glb"></a-asset-item>
+            <a-asset-item id="hamburger-model" src="Hamburger.glb"></a-asset-item>
+            <a-asset-item id="hamburger2-model" src="Hamburger2.glb"></a-asset-item>
+            <a-asset-item id="burgerlow-model" src="Burger%20low.glb"></a-asset-item>
+        </a-assets>
+
+        <a-light type="ambient" color="#ffffff" intensity="0.8"></a-light>
+        <a-light type="directional" color="#ffffff" intensity="1" position="1 2 1"></a-light>
+
+        <a-marker preset="hiro" id="marker">
+            <a-entity id="burger" position="0 0 0" scale="5 5 5"></a-entity>
+        </a-marker>
+
+        <a-entity camera></a-entity>
+    </a-scene>
 
     <script>
-        const burgerData = {
-            0: { name: 'Classic Burger', model: '#burger-model', scale: 8 },
-            1: { name: 'Big Burger', model: '#bigburger-model', scale: 6 },
-            2: { name: 'Zinger Burger', model: '#zinger-model', scale: 8 },
-            3: { name: 'Hamburger', model: '#hamburger-model', scale: 8 },
-            4: { name: 'Hamburger 2', model: '#hamburger2-model', scale: 8 },
-            5: { name: 'Burger Low', model: '#burgerlow-model', scale: 8 }
+        const data = {
+            'burger': { name: 'Classic Burger', desc: 'Классический бургер', model: '#burger-model' },
+            'big-burger': { name: 'Big Burger', desc: 'Большой бургер', model: '#bigburger-model' },
+            'zinger': { name: 'Zinger Burger', desc: 'Острый куриный', model: '#zinger-model' },
+            'hamburger': { name: 'Hamburger', desc: 'Традиционный', model: '#hamburger-model' },
+            'hamburger2': { name: 'Hamburger 2', desc: 'Альтернативный', model: '#hamburger2-model' },
+            'burger-low': { name: 'Burger Low', desc: 'Легкий бургер', model: '#burgerlow-model' }
         };
 
-        let currentBurger = null;
-        let currentScale = 8;
-        let isRotating = false;
-        let activeEntity = null;
+        const params = new URLSearchParams(window.location.search);
+        const burgerId = params.get('burger') || 'burger';
+        const info = data[burgerId];
 
-        function init() {
-            // Настраиваем все маркеры
-            for (let i = 0; i <= 5; i++) {
-                const marker = document.getElementById(`marker-${i}`);
-                const entity = document.getElementById(`burger-${i}`);
-                const data = burgerData[i];
-                
-                entity.setAttribute('gltf-model', data.model);
-                
-                marker.addEventListener('markerFound', () => {
-                    currentBurger = i;
-                    activeEntity = entity;
-                    currentScale = data.scale;
-                    
-                    document.getElementById('burger-name').textContent = data.name;
-                    document.getElementById('marker-hint').classList.add('hidden');
-                    document.getElementById('burger-info').classList.remove('hidden');
-                    
-                    console.log('Marker found:', i, data.name);
-                });
-                
-                marker.addEventListener('markerLost', () => {
-                    if (currentBurger === i) {
-                        document.getElementById('marker-hint').classList.remove('hidden');
-                        document.getElementById('burger-info').classList.add('hidden');
-                        currentBurger = null;
-                        activeEntity = null;
-                    }
-                });
-            }
+        if (info) {
+            document.getElementById('burger-name').textContent = info.name;
+            document.getElementById('burger-desc').textContent = info.desc;
+            
+            const burger = document.getElementById('burger');
+            burger.setAttribute('gltf-model', info.model);
         }
 
-        function rotateBurger() {
-            if (!activeEntity) return;
-            isRotating = !isRotating;
-            if (isRotating) {
-                activeEntity.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear');
+        let rotating = false;
+        let scale = 5;
+
+        document.getElementById('marker').addEventListener('markerFound', () => {
+            document.getElementById('hint').classList.add('hidden');
+            document.getElementById('controls').classList.remove('hidden');
+        });
+
+        document.getElementById('marker').addEventListener('markerLost', () => {
+            document.getElementById('hint').classList.remove('hidden');
+            document.getElementById('controls').classList.add('hidden');
+        });
+
+        function rotate() {
+            rotating = !rotating;
+            const burger = document.getElementById('burger');
+            if (rotating) {
+                burger.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 4000');
             } else {
-                activeEntity.removeAttribute('animation');
+                burger.removeAttribute('animation');
             }
         }
 
-        function scaleUp() {
-            if (!activeEntity) return;
-            currentScale = Math.min(currentScale + 0.5, 15);
-            activeEntity.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
+        function bigger() {
+            scale = Math.min(scale + 1, 10);
+            document.getElementById('burger').setAttribute('scale', `${scale} ${scale} ${scale}`);
         }
 
-        function scaleDown() {
-            if (!activeEntity) return;
-            currentScale = Math.max(currentScale - 0.5, 3);
-            activeEntity.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
+        function smaller() {
+            scale = Math.max(scale - 1, 2);
+            document.getElementById('burger').setAttribute('scale', `${scale} ${scale} ${scale}`);
         }
 
-        function goBack() {
+        function back() {
             window.location.href = 'index.html';
         }
-
-        window.onload = init;
     </script>
 </body>
 </html>
