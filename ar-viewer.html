@@ -135,28 +135,18 @@
 
         <!-- Hiro Marker - универсальный для всех бургеров -->
         <a-marker preset="hiro" id="marker-hiro" emitevents="true">
-            <a-entity id="burger-display" position="0 0.5 0" scale="8 8 8" rotation="0 0 0"></a-entity>
+            <a-entity id="burger-display" position="0 0 0" scale="0.5 0.5 0.5" rotation="0 0 0"></a-entity>
         </a-marker>
 
         <a-entity camera></a-entity>
     </a-scene>
 
-    <!-- Debug Console -->
-    <div id="debug-console" style="position: fixed; top: 150px; left: 10px; right: 10px; max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.9); color: #0f0; padding: 10px; font-family: monospace; font-size: 11px; z-index: 100; border-radius: 5px; border: 2px solid #0f0;">
-        <div style="font-weight: bold; margin-bottom: 5px;">🚀 AR Viewer загружен</div>
-    </div>
+    
 
     <script>
-        // Debug logger
+        // Logger
         function log(msg) {
             console.log(msg);
-            const debugDiv = document.getElementById('debug-console');
-            if (debugDiv) {
-                const entry = document.createElement('div');
-                entry.textContent = `> ${msg}`;
-                debugDiv.appendChild(entry);
-                debugDiv.scrollTop = debugDiv.scrollHeight;
-            }
         }
 
         // Проверка загрузки библиотек
@@ -214,7 +204,7 @@
         }
 
         let rotating = false;
-        let scale = 8;
+        let scale = 0.5;
 
         // Обработчики для маркера Hiro
         const currentMarker = document.getElementById('marker-hiro');
@@ -284,15 +274,15 @@
         }
 
         function bigger() {
-            scale = Math.min(scale + 1, 12);
+            scale = Math.min(scale + 0.2, 2.0);
             document.getElementById('burger-display').setAttribute('scale', `${scale} ${scale} ${scale}`);
-            log(`➕ Scale: ${scale}`);
+            log(`➕ Scale: ${scale} ${scale} ${scale}`);
         }
 
         function smaller() {
-            scale = Math.max(scale - 1, 4);
+            scale = Math.max(scale - 0.2, 0.2);
             document.getElementById('burger-display').setAttribute('scale', `${scale} ${scale} ${scale}`);
-            log(`➖ Scale: ${scale}`);
+            log(`➖ Scale: ${scale} ${scale} ${scale}`);
         }
 
         function back() {
@@ -310,16 +300,16 @@
             if (entity && data) {
                 // Показываем модель напрямую без маркера
                 entity.setAttribute('visible', 'true');
-                entity.setAttribute('position', '0 0 -3'); // Перед камерой
-                entity.setAttribute('scale', '3 3 3');
+                entity.setAttribute('position', '0 0 -2'); // Перед камерой
+                entity.setAttribute('scale', '0.5 0.5 0.5'); // Подходящий масштаб для теста
                 entity.setAttribute('gltf-model', data.model);
                 
                 document.getElementById('hint').classList.add('hidden');
                 document.getElementById('controls').classList.remove('hidden');
                 
                 log('✅ TEST MODE: Model displayed');
-                log(`📐 Scale: 3 3 3`);
-                log(`📍 Position: 0 0 -3`);
+                log(`📐 Scale: 0.5 0.5 0.5`);
+                log(`📍 Position: 0 0 -2`);
             } else {
                 log(`❌ Entity: ${!!entity}, Data: ${!!data}`);
             }
