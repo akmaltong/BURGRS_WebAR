@@ -24,6 +24,15 @@
             color: white;
             text-align: center;
         }
+        .marker-info {
+            background: #ff6b6b;
+            color: white;
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
         .hint {
             position: fixed;
             top: 50%;
@@ -34,6 +43,11 @@
             padding: 30px;
             border-radius: 20px;
             text-align: center;
+            max-width: 90%;
+        }
+        .hint h2 {
+            margin-bottom: 15px;
+            color: #feca57;
         }
         .controls {
             position: fixed;
@@ -62,11 +76,12 @@
     <div id="ui">
         <div class="header">
             <h1>🍔 <span id="burger-name">Burger</span></h1>
-            <p id="burger-desc">Наведите на Hiro маркер</p>
+            <p id="burger-desc">Наведите на маркер</p>
+            <div class="marker-info" id="marker-info">Маркер #<span id="marker-num">0</span></div>
         </div>
         <div class="hint" id="hint">
-            <h2>📱 Наведите на маркер</h2>
-            <p style="margin-top: 10px;">Используйте печатный Hiro маркер</p>
+            <h2>📱 Наведите на маркер <span id="hint-marker">0</span></h2>
+            <p style="margin-top: 10px;">Найдите в меню маркер с номером <span id="hint-num">0</span></p>
         </div>
         <div class="controls hidden" id="controls">
             <button class="btn" onclick="rotate()">🔄 Вращать</button>
@@ -76,7 +91,11 @@
         </div>
     </div>
 
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" renderer="logarithmicDepthBuffer: true;" vr-mode-ui="enabled: false">
+    <a-scene embedded 
+             arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;" 
+             renderer="logarithmicDepthBuffer: true;" 
+             vr-mode-ui="enabled: false">
+        
         <a-assets>
             <a-asset-item id="burger-model" src="Burger.glb"></a-asset-item>
             <a-asset-item id="bigburger-model" src="Big%20Burger.glb"></a-asset-item>
@@ -89,66 +108,102 @@
         <a-light type="ambient" color="#ffffff" intensity="0.8"></a-light>
         <a-light type="directional" color="#ffffff" intensity="1" position="1 2 1"></a-light>
 
-        <a-marker preset="hiro" id="marker">
-            <a-entity id="burger" position="0 0 0" scale="5 5 5"></a-entity>
+        <!-- Маркер 0 - Classic Burger -->
+        <a-marker type="barcode" value="0" id="marker-0">
+            <a-entity id="burger-0" position="0 0 0" scale="8 8 8"></a-entity>
+        </a-marker>
+
+        <!-- Маркер 1 - Big Burger -->
+        <a-marker type="barcode" value="1" id="marker-1">
+            <a-entity id="burger-1" position="0 0 0" scale="6 6 6"></a-entity>
+        </a-marker>
+
+        <!-- Маркер 2 - Zinger Burger -->
+        <a-marker type="barcode" value="2" id="marker-2">
+            <a-entity id="burger-2" position="0 0 0" scale="8 8 8"></a-entity>
+        </a-marker>
+
+        <!-- Маркер 3 - Hamburger -->
+        <a-marker type="barcode" value="3" id="marker-3">
+            <a-entity id="burger-3" position="0 0 0" scale="8 8 8"></a-entity>
+        </a-marker>
+
+        <!-- Маркер 4 - Hamburger 2 -->
+        <a-marker type="barcode" value="4" id="marker-4">
+            <a-entity id="burger-4" position="0 0 0" scale="8 8 8"></a-entity>
+        </a-marker>
+
+        <!-- Маркер 5 - Burger Low -->
+        <a-marker type="barcode" value="5" id="marker-5">
+            <a-entity id="burger-5" position="0 0 0" scale="8 8 8"></a-entity>
         </a-marker>
 
         <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-        const data = {
-            'burger': { name: 'Classic Burger', desc: 'Классический бургер', model: '#burger-model' },
-            'big-burger': { name: 'Big Burger', desc: 'Большой бургер', model: '#bigburger-model' },
-            'zinger': { name: 'Zinger Burger', desc: 'Острый куриный', model: '#zinger-model' },
-            'hamburger': { name: 'Hamburger', desc: 'Традиционный', model: '#hamburger-model' },
-            'hamburger2': { name: 'Hamburger 2', desc: 'Альтернативный', model: '#hamburger2-model' },
-            'burger-low': { name: 'Burger Low', desc: 'Легкий бургер', model: '#burgerlow-model' }
+        const burgerData = {
+            0: { name: 'Classic Burger', desc: 'Классический бургер с сочной котлетой', model: '#burger-model' },
+            1: { name: 'Big Burger', desc: 'Большой бургер с двойной котлетой', model: '#bigburger-model' },
+            2: { name: 'Zinger Burger', desc: 'Острый куриный бургер', model: '#zinger-model' },
+            3: { name: 'Hamburger', desc: 'Традиционный гамбургер', model: '#hamburger-model' },
+            4: { name: 'Hamburger 2', desc: 'Альтернативная версия гамбургера', model: '#hamburger2-model' },
+            5: { name: 'Burger Low', desc: 'Легкий бургер для перекуса', model: '#burgerlow-model' }
         };
 
+        // Получаем ID бургера из URL (0-5)
         const params = new URLSearchParams(window.location.search);
-        const burgerId = params.get('burger') || 'burger';
-        const info = data[burgerId];
+        const burgerId = parseInt(params.get('burger')) || 0;
+        const data = burgerData[burgerId];
 
-        if (info) {
-            document.getElementById('burger-name').textContent = info.name;
-            document.getElementById('burger-desc').textContent = info.desc;
+        if (data) {
+            document.getElementById('burger-name').textContent = data.name;
+            document.getElementById('burger-desc').textContent = data.desc;
+            document.getElementById('marker-num').textContent = burgerId;
+            document.getElementById('hint-marker').textContent = burgerId;
+            document.getElementById('hint-num').textContent = burgerId;
             
-            const burger = document.getElementById('burger');
-            burger.setAttribute('gltf-model', info.model);
+            // Загружаем модель в соответствующий маркер
+            const entity = document.getElementById(`burger-${burgerId}`);
+            entity.setAttribute('gltf-model', data.model);
         }
 
         let rotating = false;
-        let scale = 5;
+        let scale = 8;
 
-        document.getElementById('marker').addEventListener('markerFound', () => {
+        // Обработчики для маркера текущего бургера
+        const currentMarker = document.getElementById(`marker-${burgerId}`);
+        
+        currentMarker.addEventListener('markerFound', () => {
+            console.log(`✅ Маркер ${burgerId} найден!`);
             document.getElementById('hint').classList.add('hidden');
             document.getElementById('controls').classList.remove('hidden');
         });
 
-        document.getElementById('marker').addEventListener('markerLost', () => {
+        currentMarker.addEventListener('markerLost', () => {
+            console.log(`❌ Маркер ${burgerId} потерян`);
             document.getElementById('hint').classList.remove('hidden');
             document.getElementById('controls').classList.add('hidden');
         });
 
         function rotate() {
             rotating = !rotating;
-            const burger = document.getElementById('burger');
+            const entity = document.getElementById(`burger-${burgerId}`);
             if (rotating) {
-                burger.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 4000');
+                entity.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 4000');
             } else {
-                burger.removeAttribute('animation');
+                entity.removeAttribute('animation');
             }
         }
 
         function bigger() {
-            scale = Math.min(scale + 1, 10);
-            document.getElementById('burger').setAttribute('scale', `${scale} ${scale} ${scale}`);
+            scale = Math.min(scale + 1, 12);
+            document.getElementById(`burger-${burgerId}`).setAttribute('scale', `${scale} ${scale} ${scale}`);
         }
 
         function smaller() {
-            scale = Math.max(scale - 1, 2);
-            document.getElementById('burger').setAttribute('scale', `${scale} ${scale} ${scale}`);
+            scale = Math.max(scale - 1, 4);
+            document.getElementById(`burger-${burgerId}`).setAttribute('scale', `${scale} ${scale} ${scale}`);
         }
 
         function back() {
